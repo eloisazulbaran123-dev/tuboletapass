@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar Sesión - TuBoleta</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --blue: #1a3a4a;
+      --cyan: #0284c7;
+      --yellow: #f9a825;
+      --gray: #f5f5f5;
+      --border: #e0e0e0;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--gray);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+    .login-container {
+      max-width: 1100px;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: white;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
+    .login-left { padding: 3rem; }
+    .logo {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--blue);
+      margin-bottom: 2rem;
+      display: block;
+      text-decoration: none;
+    }
+    .logo span { color: var(--yellow); }
+    .alert {
+      background: #fef3c7;
+      border: 1px solid #fcd34d;
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 2rem;
+      display: flex;
+      gap: 0.75rem;
+    }
+    .alert-icon {
+      color: #f59e0b;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+    .alert-content h4 {
+      color: #92400e;
+      font-size: 0.95rem;
+      margin-bottom: 0.25rem;
+      font-weight: 600;
+    }
+    .alert-content p {
+      color: #a16207;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+    .alert-content a {
+      color: #0284c7;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .form-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--blue);
+      margin-bottom: 0.5rem;
+    }
+    .form-subtitle {
+      color: #666;
+      margin-bottom: 2rem;
+    }
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--blue);
+      margin-bottom: 0.5rem;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 0.875rem 1rem;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--cyan);
+    }
+    .btn-primary {
+      width: 100%;
+      padding: 1rem;
+      background: var(--cyan);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 1rem;
+    }
+    .btn-primary:hover {
+      background: #0369a1;
+      transform: translateY(-2px);
+    }
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .form-footer {
+      text-align: center;
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+    .form-footer a, .form-link a {
+      color: var(--cyan);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .form-link {
+      text-align: center;
+      margin-top: 1rem;
+      color: #666;
+    }
+    .login-right {
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      padding: 3rem;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .feature-icon {
+      width: 80px;
+      height: 80px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 2rem;
+    }
+    .feature-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+    }
+    .feature-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: rgba(255,255,255,0.1);
+      padding: 1rem;
+      border-radius: 12px;
+    }
+    .feature-number {
+      width: 32px;
+      height: 32px;
+      background: var(--yellow);
+      color: var(--blue);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .feature-text strong {
+      display: block;
+      font-size: 1rem;
+      margin-bottom: 0.25rem;
+    }
+    .feature-text span {
+      font-size: 0.85rem;
+      opacity: 0.9;
+    }
+    .success-message {
+      background: #dcfce7;
+      border: 1px solid #86efac;
+      color: #166534;
+      padding: 1rem;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+      text-align: center;
+      font-weight: 600;
+    }
+    .error-message {
+      background: #fee2e2;
+      border: 1px solid #fca5a5;
+      color: #991b1b;
+      padding: 1rem;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+      text-align: center;
+      font-weight: 600;
+    }
+    .hidden { display: none !important; }
+    @media (max-width: 968px) {
+      .login-container { grid-template-columns: 1fr; }
+      .login-right { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-left">
+       <a href="/" class="logo">
+  <img src="public/logos/tuboleta-logo-azul.png" alt="Tuboleta" style="height:35px;width:auto;" />
+</a>
+      
+      <div class="alert">
+        <div class="alert-icon">⚠️</div>
+        <div class="alert-content">
+          <h4>Importante</h4>
+          <p>¿Te registraste en Tuboleta antes del 14 de enero de 2026?<br>
+          Para continuar, debes <a href="#" id="resetPasswordLink">restablecer tu contraseña</a>. Si fue después de esa fecha, inicia sesión normalmente.</p>
+        </div>
+      </div>
+      
+      <div id="messageContainer"></div>
+      
+      <div id="loginForm">
+        <h2 class="form-title">Iniciar sesión</h2>
+        <p class="form-subtitle">Accede a tu cuenta de TuBoleta</p>
+        
+        <form id="loginFormElement">
+          <div class="form-group">
+            <label>Correo electrónico o número de documento</label>
+            <input type="text" id="loginEmail" placeholder="tu@email.com" required>
+          </div>
+          
+          <div class="form-group">
+            <label>Contraseña</label>
+            <input type="password" id="loginPassword" placeholder="••••••••" required>
+          </div>
+          
+          <button type="submit" class="btn-primary" id="loginBtn">Iniciar sesión</button>
+        </form>
+        
+        <div class="form-link">
+          <a href="#" id="forgotPasswordLink">¿Olvidaste tu contraseña?</a>
+        </div>
+        
+        <div class="form-footer">
+          ¿Aún no tienes cuenta? <a href="#" id="showRegisterLink">Crear cuenta</a>
+        </div>
+      </div>
+      
+      <div id="registerForm" class="hidden">
+        <h2 class="form-title">Crear cuenta</h2>
+        <p class="form-subtitle">Únete a TuBoleta y disfruta de los mejores eventos</p>
+        
+        <form id="registerFormElement">
+          <div class="form-group">
+            <label>Nombre completo</label>
+            <input type="text" id="registerName" placeholder="Tu nombre" required>
+          </div>
+          
+          <div class="form-group">
+            <label>Correo electrónico</label>
+            <input type="email" id="registerEmail" placeholder="tu@email.com" required>
+          </div>
+          
+          <div class="form-group">
+            <label>Teléfono</label>
+            <input type="tel" id="registerPhone" placeholder="+57 300 123 4567" required>
+          </div>
+          
+          <div class="form-group">
+            <label>Contraseña</label>
+            <input type="password" id="registerPassword" placeholder="Mínimo 6 caracteres" required minlength="6">
+          </div>
+          
+          <button type="submit" class="btn-primary" id="registerBtn">Crear cuenta</button>
+        </form>
+        
+        <div class="form-footer">
+          ¿Ya tienes cuenta? <a href="#" id="showLoginLink">Iniciar sesión</a>
+        </div>
+      </div>
+      
+      <div id="forgotPasswordForm" class="hidden">
+        <h2 class="form-title">Recuperar contraseña</h2>
+        <p class="form-subtitle">Te enviaremos un enlace para restablecer tu contraseña</p>
+        
+        <form id="forgotPasswordFormElement">
+          <div class="form-group">
+            <label>Correo electrónico</label>
+            <input type="email" id="forgotEmail" placeholder="tu@email.com" required>
+          </div>
+          
+          <button type="submit" class="btn-primary" id="forgotBtn">Enviar enlace</button>
+        </form>
+        
+        <div class="form-footer">
+          <a href="#" id="backToLoginLink">Volver al inicio de sesión</a>
+        </div>
+      </div>
+    </div>
+    
+    <div class="login-right">
+      <div class="feature-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="40" height="40">
+          <path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/>
+          <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+        </svg>
+      </div>
+      
+      <h3 class="feature-title">Así de fácil actualizas tu contraseña:</h3>
+      
+      <ul class="feature-list">
+        <li class="feature-item">
+          <div class="feature-number">1</div>
+          <div class="feature-text">
+            <strong>Da clic en:</strong>
+            <span>¿Olvidaste tu contraseña?</span>
+          </div>
+        </li>
+        
+        <li class="feature-item">
+          <div class="feature-number">2</div>
+          <div class="feature-text">
+            <strong>Ingresa tu correo electrónico.</strong>
+          </div>
+        </li>
+        
+        <li class="feature-item">
+          <div class="feature-number">3</div>
+          <div class="feature-text">
+            <strong>Da clic en:</strong>
+            <span>Enviar código</span>
+          </div>
+        </li>
+        
+        <li class="feature-item">
+          <div class="feature-number">4</div>
+          <div class="feature-text">
+            <strong>Revisa tu correo y digita</strong>
+            <span>el código que recibiste.</span>
+          </div>
+        </li>
+        
+        <li class="feature-item">
+          <div class="feature-number">5</div>
+          <div class="feature-text">
+            <strong>Asigna tu nueva contraseña.</strong>
+          </div>
+        </li>
+      </ul>
+      
+      <p style="margin-top:2rem;text-align:center;font-weight:700;">¡Y listo!</p>
+      <p style="text-align:center;opacity:0.9;">Tu cuenta está activa y lista para seguir disfrutando lo mejor del entretenimiento.</p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth } from '/src/supabase.ts';
+
+    const loginFormDiv = document.getElementById('loginForm');
+    const registerFormDiv = document.getElementById('registerForm');
+    const forgotPasswordFormDiv = document.getElementById('forgotPasswordForm');
+    const messageContainer = document.getElementById('messageContainer');
+
+    // Form switching
+    document.getElementById('showRegisterLink').addEventListener('click', (e) => {
+      e.preventDefault();
+      loginFormDiv.classList.add('hidden');
+      registerFormDiv.classList.remove('hidden');
+      forgotPasswordFormDiv.classList.add('hidden');
+      clearMessages();
+    });
+
+    document.getElementById('showLoginLink').addEventListener('click', (e) => {
+      e.preventDefault();
+      loginFormDiv.classList.remove('hidden');
+      registerFormDiv.classList.add('hidden');
+      forgotPasswordFormDiv.classList.add('hidden');
+      clearMessages();
+    });
+
+    document.getElementById('forgotPasswordLink').addEventListener('click', (e) => {
+      e.preventDefault();
+      loginFormDiv.classList.add('hidden');
+      registerFormDiv.classList.add('hidden');
+      forgotPasswordFormDiv.classList.remove('hidden');
+      clearMessages();
+    });
+
+    document.getElementById('resetPasswordLink').addEventListener('click', (e) => {
+      e.preventDefault();
+      loginFormDiv.classList.add('hidden');
+      registerFormDiv.classList.add('hidden');
+      forgotPasswordFormDiv.classList.remove('hidden');
+      clearMessages();
+    });
+
+    document.getElementById('backToLoginLink').addEventListener('click', (e) => {
+      e.preventDefault();
+      loginFormDiv.classList.remove('hidden');
+      registerFormDiv.classList.add('hidden');
+      forgotPasswordFormDiv.classList.add('hidden');
+      clearMessages();
+    });
+
+    // Login
+    document.getElementById('loginFormElement').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      const btn = document.getElementById('loginBtn');
+
+      btn.disabled = true;
+      btn.textContent = 'Iniciando sesión...';
+      clearMessages();
+
+      try {
+        const data = await auth.signIn(email, password);
+        
+        showMessage('¡Bienvenido! Redirigiendo...', 'success');
+        
+        // Save user info
+        localStorage.setItem('tuboleta-user', JSON.stringify({
+          id: data.user.id,
+          email: data.user.email,
+          name: data.user.user_metadata?.full_name || email.split('@')[0]
+        }));
+
+        // Redirect
+        const cart = localStorage.getItem('tuboleta-cart');
+        setTimeout(() => {
+          window.location.href = cart ? '/checkout.html' : '/';
+        }, 1000);
+
+      } catch (error) {
+        showMessage(error.message || 'Error al iniciar sesión', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Iniciar sesión';
+      }
+    });
+
+    // Register
+    document.getElementById('registerFormElement').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('registerName').value;
+      const email = document.getElementById('registerEmail').value;
+      const phone = document.getElementById('registerPhone').value;
+      const password = document.getElementById('registerPassword').value;
+      const btn = document.getElementById('registerBtn');
+
+      btn.disabled = true;
+      btn.textContent = 'Creando cuenta...';
+      clearMessages();
+
+      try {
+        await auth.signUp(email, password, {
+          full_name: name,
+          phone: phone
+        });
+
+        showMessage('¡Cuenta creada! Revisa tu correo para verificar tu cuenta.', 'success');
+        
+        setTimeout(() => {
+          document.getElementById('showLoginLink').click();
+        }, 3000);
+
+      } catch (error) {
+        showMessage(error.message || 'Error al crear la cuenta', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Crear cuenta';
+      }
+    });
+
+    // Forgot Password
+    document.getElementById('forgotPasswordFormElement').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('forgotEmail').value;
+      const btn = document.getElementById('forgotBtn');
+
+      btn.disabled = true;
+      btn.textContent = 'Enviando...';
+      clearMessages();
+
+      try {
+        await auth.resetPassword(email);
+        showMessage('Te hemos enviado un enlace de recuperación. Revisa tu correo.', 'success');
+        btn.disabled = false;
+        btn.textContent = 'Enviar enlace';
+
+      } catch (error) {
+        showMessage(error.message || 'Error al enviar el enlace', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Enviar enlace';
+      }
+    });
+
+    function showMessage(message, type) {
+      messageContainer.innerHTML = `<div class="${type}-message">${message}</div>`;
+    }
+
+    function clearMessages() {
+      messageContainer.innerHTML = '';
+    }
+
+    // Check if already logged in
+    (async function() {
+      const session = await auth.getSession();
+      if (session) {
+        window.location.href = '/';
+      }
+    })();
+  </script>
+</body>
+</html>

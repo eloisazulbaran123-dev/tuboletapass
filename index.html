@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TuBoleta - Compra tus boletas en línea</title>
+  <link rel="stylesheet" href="/src/styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Botón Tuboleta Pass */
+.tuboleta-pass-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: #0077b6;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: 0.2s;
+}
+.tuboleta-pass-btn:hover {
+  background: #0096c7;
+  transform: translateY(-1px);
+}
+
+/* Ícono circular */
+.user-circle-icon {
+  width: 32px;
+  height: 32px;
+  background: #005f8f;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.user-circle-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Logo */
+.tuboleta-logo-img {
+  height: 26px;
+}
+</style>
+
+</head>
+<body>
+  <!-- Header -->
+  <header class="header" id="header">
+    <div class="container header-content">
+      <a href="/" class="logo">
+  <img src="public/logos/tuboleta-logo.png" alt="Tuboleta" style="height:35px;width:auto;" />
+</a>
+
+      <nav class="nav-desktop">
+        <a href="#conciertos">Conciertos</a>
+        <a href="#teatro">Teatro</a>
+        <a href="#deportes">Deportes</a>
+        <a href="/mis-ordenes.html">Mis Órdenes</a>
+        <div class="nav-dropdown">
+          <button class="nav-dropdown-btn">
+            Más <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav-dropdown-content">
+            <a href="#familiar">Familiar</a>
+            <a href="#festivales">Festivales</a>
+            <a href="#experiencias">Experiencias</a>
+          </div>
+        </div>
+      </nav>
+
+      <div class="header-actions">
+        <a href="#" class="header-link">Bono Regalo</a>
+        <a href="#" class="header-link">Contáctanos</a>
+        <!-- El auth-ui se insertará aquí automáticamente -->
+        <button class="cart-btn" id="cartBtn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          <span class="cart-badge" id="cartBadge">0</span>
+        </button>
+        <button class="mobile-menu-btn" id="mobileMenuBtn">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="container search-container">
+      <div class="search-bar">
+        <div class="search-filter" id="cityFilter">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span id="cityLabel">Ciudad</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          <div class="filter-dropdown" id="cityDropdown">
+            <button data-value="">Todas las ciudades</button>
+            <button data-value="Bogotá">Bogotá</button>
+            <button data-value="Medellín">Medellín</button>
+            <button data-value="Cali">Cali</button>
+            <button data-value="Barranquilla">Barranquilla</button>
+            <button data-value="Cartagena">Cartagena</button>
+            <button data-value="Valledupar">Valledupar</button>
+          </div>
+        </div>
+
+        <div class="search-filter" id="categoryFilter">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          <span id="categoryLabel">Categoría</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          <div class="filter-dropdown" id="categoryDropdown">
+            <button data-value="">Todas</button>
+            <button data-value="concierto">Conciertos</button>
+            <button data-value="teatro">Teatro</button>
+            <button data-value="deportes">Deportes</button>
+            <button data-value="familiar">Familiar</button>
+            <button data-value="festival">Festivales</button>
+          </div>
+        </div>
+
+        <div class="search-filter" id="dateFilter">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span id="dateLabel">Fecha</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          <input type="date" id="dateInput" class="date-input" />
+        </div>
+
+        <div class="search-input-wrapper">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input type="text" id="searchInput" placeholder="Buscar por artista, evento..." class="search-input" />
+        </div>
+
+        <button class="search-btn" id="searchBtn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        </button>
+      </div>
+
+      <!-- Search Results Dropdown -->
+      <div class="search-results" id="searchResults"></div>
+    </div>
+  </header>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-header">
+      <span class="logo">Tub<span class="logo-accent">o</span>leta</span>
+      <button class="mobile-menu-close" id="mobileMenuClose">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <nav class="mobile-nav">
+      <a href="#conciertos">Conciertos</a>
+      <a href="#teatro">Teatro</a>
+      <a href="#deportes">Deportes</a>
+      <a href="/mis-ordenes.html">Mis Órdenes</a>
+      <a href="#familiar">Familiar</a>
+      <a href="#festivales">Festivales</a>
+      <a href="#experiencias">Experiencias</a>
+    </nav>
+  </div>
+
+  <!-- Main Content -->
+  <main>
+    <!-- Featured Banner -->
+    <section class="featured-banner">
+      <div class="banner-slider" id="bannerSlider">
+        <div class="banner-slide active" style="background-image: url('https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=1600&h=600&fit=crop')">
+          <div class="banner-overlay">
+            <div class="container">
+              <span class="banner-tag">Destacado</span>
+              <h2>Coldplay - Music of the Spheres</h2>
+              <p>El espectáculo más esperado del año</p>
+              <button class="btn-primary" onclick="window.location.href='evento.html?id=1'">Comprar boletas</button>
+            </div>
+          </div>
+        </div>
+        <div class="banner-slide" style="background-image: url('https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=1600&h=600&fit=crop')">
+          <div class="banner-overlay">
+            <div class="container">
+              <span class="banner-tag">Festival</span>
+              <h2>Festival Estéreo Picnic 2026</h2>
+              <p>3 días de música inolvidable</p>
+              <button class="btn-primary" onclick="window.location.href='evento.html?id=2'">Comprar boletas</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="banner-dots" id="bannerDots"></div>
+    </section>
+
+    <!-- Events Sections -->
+    <section class="section" id="destacados">
+      <div class="container">
+        <div class="section-header">
+          <h2>Destacados</h2>
+          <a href="#" class="see-all">Ver todos</a>
+        </div>
+        <div class="events-grid" id="featuredEvents"></div>
+      </div>
+    </section>
+
+    <section class="section" id="conciertos">
+      <div class="container">
+        <div class="section-header">
+          <h2>Conciertos</h2>
+          <a href="#" class="see-all">Ver todos</a>
+        </div>
+        <div class="events-scroll" id="concertEvents"></div>
+      </div>
+    </section>
+
+    <section class="section" id="teatro">
+      <div class="container">
+        <div class="section-header">
+          <h2>Teatro</h2>
+          <a href="#" class="see-all">Ver todos</a>
+        </div>
+        <div class="events-scroll" id="theaterEvents"></div>
+      </div>
+    </section>
+
+    <!-- Categories Section -->
+    <section class="section categories-section">
+      <div class="container">
+        <h2 class="section-title-center">Explora por categoría</h2>
+        <div class="categories-grid" id="categoriesGrid"></div>
+      </div>
+    </section>
+
+    <!-- Venues Section -->
+    <section class="section">
+      <div class="container">
+        <div class="section-header">
+          <h2>Lugares populares</h2>
+          <a href="#" class="see-all">Ver todos</a>
+        </div>
+        <div class="venues-scroll" id="venuesGrid"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <span class="logo footer-logo">Tub<span class="logo-accent">o</span>leta</span>
+          <p>La plataforma líder de venta de boletas en Colombia.</p>
+          <div class="social-links">
+            <a href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
+            <a href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Compañía</h4>
+          <a href="#">Sobre nosotros</a>
+          <a href="#">Trabaja con nosotros</a>
+          <a href="#">Prensa</a>
+        </div>
+        <div class="footer-col">
+          <h4>Ayuda</h4>
+          <a href="#">Centro de ayuda</a>
+          <a href="#">Contáctanos</a>
+          <a href="#">Términos y condiciones</a>
+          <a href="/mis-ordenes.html" style="color: var(--cyan);">Mis Órdenes</a>
+          <a href="admin.html" style="color: var(--yellow);">Panel Admin</a>
+        </div>
+        <div class="footer-col">
+          <h4>Descarga la app</h4>
+          <div class="app-buttons">
+            <a href="#" class="app-btn">App Store</a>
+            <a href="#" class="app-btn">Google Play</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 TuBoleta. Todos los derechos reservados.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Cart Drawer -->
+  <div class="drawer-overlay" id="cartOverlay"></div>
+  <div class="cart-drawer" id="cartDrawer">
+    <div class="drawer-header">
+      <h3>Tu carrito</h3>
+      <button class="drawer-close" id="cartClose">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="drawer-content" id="cartContent"></div>
+    <div class="drawer-footer" id="cartFooter" style="display: none;">
+      <div class="cart-totals">
+        <div class="cart-total-row"><span>Subtotal</span><span id="cartSubtotal">$0</span></div>
+        <div class="cart-total-row"><span>Servicio (10%)</span><span id="cartFee">$0</span></div>
+        <div class="cart-total-row total"><span>Total</span><span id="cartTotal">$0</span></div>
+      </div>
+      <a href="checkout.html" class="btn-primary btn-block">Ir al checkout</a>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checkout - TuBoleta</title>
+  <link rel="stylesheet" href="/src/styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    .checkout-header { background: var(--blue); padding: 1rem 0; }
+    .checkout-header .container { display: flex; align-items: center; justify-content: space-between; }
+    .back-btn { display: flex; align-items: center; gap: 0.5rem; color: var(--white); text-decoration: none; }
+    .secure-badge { display: flex; align-items: center; gap: 0.5rem; color: var(--white); font-size: 0.85rem; }
+    .checkout-page { padding: 2rem 0; background: var(--gray); min-height: 80vh; }
+    .checkout-grid { display: grid; grid-template-columns: 1fr; gap: 2rem; }
+    .checkout-card { background: var(--white); border-radius: var(--radius); box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 1.5rem; margin-bottom: 1.5rem; }
+    .checkout-card h2 { font-size: 1.1rem; font-weight: 700; color: var(--blue); margin-bottom: 1rem; }
+    .order-item { display: flex; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid var(--border); }
+    .order-item img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; }
+    .order-item-info h4 { font-size: 0.9rem; font-weight: 600; color: var(--blue); }
+    .order-item-info p { font-size: 0.8rem; color: var(--text-light); }
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: var(--text); font-size: 0.9rem; }
+    .form-group input, .form-group select { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; font-family: inherit; }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--cyan); }
+    .form-row { display: grid; grid-template-columns: 1fr 2fr; gap: 1rem; }
+    .payment-methods { display: grid; gap: 1rem; margin-bottom: 1.5rem; }
+    .payment-method { display: flex; align-items: center; gap: 1rem; padding: 1rem; border: 2px solid var(--border); border-radius: 10px; cursor: pointer; transition: all 0.2s; }
+    .payment-method:hover, .payment-method.selected { border-color: var(--cyan); background: rgba(0,180,216,0.05); }
+    .payment-method-icon { width: 44px; height: 44px; border-radius: 8px; background: var(--gray); display: flex; align-items: center; justify-content: center; }
+    .payment-method.selected .payment-method-icon { background: var(--cyan); color: white; }
+    .payment-method h4 { font-weight: 600; color: var(--blue); font-size: 0.95rem; margin: 0; }
+    .payment-method p { font-size: 0.8rem; color: var(--text-light); margin: 0.25rem 0 0 0; }
+    .provider-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin: 1rem 0; }
+    .provider-option { padding: 1rem; border: 2px solid var(--border); border-radius: 10px; text-align: center; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; background: white; }
+    .provider-option:hover, .provider-option.selected { border-color: var(--cyan); background: rgba(0,180,216,0.05); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,180,216,0.2); }
+    .provider-logo { width: 60px; height: 60px; object-fit: contain; display: block; }
+    .provider-option span { display: block; font-size: 0.85rem; font-weight: 600; color: var(--blue); }
+    .summary-card { background: var(--white); border-radius: var(--radius); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .summary-header { padding: 1rem; border-bottom: 1px solid var(--border); }
+    .summary-body { padding: 1rem; }
+    .summary-row { display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-light); }
+    .summary-row.total { font-weight: 700; color: var(--blue); border-top: 1px solid var(--border); padding-top: 0.5rem; margin-top: 0.5rem; }
+    .summary-row.total span:last-child { color: var(--cyan); }
+    .hidden { display: none !important; }
+    .btn-primary { width: 100%; padding: 1rem; background: linear-gradient(135deg, var(--yellow) 0%, #e6a800 100%); color: white; font-size: 1rem; font-weight: 700; border-radius: 10px; border: none; cursor: pointer; transition: all 0.2s; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(230,184,0,0.4); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    @media (min-width: 768px) { .checkout-grid { grid-template-columns: 1fr 320px; } .provider-grid { grid-template-columns: repeat(3, 1fr); } }
+  </style>
+</head>
+<body>
+  <header class="checkout-header">
+    <div class="container">
+      <a href="/" class="back-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        <span class="logo">Tub<span style="color: var(--yellow);">o</span>leta</span>
+      </a>
+      <div class="secure-badge">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        Compra segura
+      </div>
+    </div>
+  </header>
+
+  <main class="checkout-page">
+    <div class="container">
+      <div id="mainStep">
+        <div class="checkout-grid">
+          <div>
+            <div class="checkout-card">
+              <h2>Tu orden</h2>
+              <div id="orderItems"></div>
+            </div>
+
+            <div class="checkout-card">
+              <h2>Información de contacto</h2>
+              <div class="form-group">
+                <label>Correo electrónico *</label>
+                <input type="email" id="email" placeholder="tu@email.com" required />
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                  <label>Nombre *</label>
+                  <input type="text" id="name" placeholder="Tu nombre" required />
+                </div>
+                <div class="form-group">
+                  <label>Teléfono *</label>
+                  <input type="tel" id="phone" placeholder="+57 300 123 4567" required />
+                </div>
+              </div>
+              
+              <!-- NUEVO: Campos de documento -->
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Tipo de documento *</label>
+                  <select id="docType" required>
+                    <option value="">Seleccionar</option>
+                    <option value="CC">Cédula de Ciudadanía</option>
+                    <option value="CE">Cédula de Extranjería</option>
+                    <option value="TI">Tarjeta de Identidad</option>
+                    <option value="PAS">Pasaporte</option>
+                    <option value="NIT">NIT</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Número de documento *</label>
+                  <input type="text" id="docNumber" placeholder="1234567890" required />
+                </div>
+              </div>
+            </div>
+
+            <div class="checkout-card">
+              <h2>Método de pago</h2>
+              <div class="payment-methods">
+                <div class="payment-method selected" data-method="card">
+                  <div class="payment-method-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                  </div>
+                  <div>
+                    <h4>Tarjeta crédito/débito</h4>
+                    <p>Visa, Mastercard, Amex</p>
+                  </div>
+                </div>
+                <div class="payment-method" data-method="transfer">
+                  <div class="payment-method-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                  </div>
+                  <div>
+                    <h4>Transferencia / Billetera</h4>
+                    <p>Nequi, Daviplata, Bancolombia</p>
+                  </div>
+                </div>
+              </div>
+
+              <div id="cardForm">
+                <div class="form-group">
+                  <label>Número de tarjeta</label>
+                  <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" />
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                  <div class="form-group">
+                    <label>Vencimiento</label>
+                    <input type="text" id="cardExpiry" placeholder="MM/YY" maxlength="5" />
+                  </div>
+                  <div class="form-group">
+                    <label>CVC</label>
+                    <input type="text" id="cardCvc" placeholder="123" maxlength="4" />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Nombre en tarjeta</label>
+                  <input type="text" id="cardName" placeholder="NOMBRE APELLIDO" />
+                </div>
+              </div>
+
+              <div id="transferForm" class="hidden">
+                <h4 style="font-size: 0.9rem; color: var(--blue); margin-bottom: 0.75rem;">Selecciona tu proveedor:</h4>
+                <div class="provider-grid">
+                  <div class="provider-option" data-provider="Nequi">
+                    <img src="logos/nequi.png" alt="Nequi" class="provider-logo" onerror="this.style.display='none';this.nextElementSibling.style.fontSize='2rem';">
+                    <span>Nequi</span>
+                  </div>
+                  <div class="provider-option" data-provider="Daviplata">
+                    <img src="logos/daviplata.png" alt="Daviplata" class="provider-logo" onerror="this.style.display='none'">
+                    <span>Daviplata</span>
+                  </div>
+                  <div class="provider-option" data-provider="Bancolombia">
+                    <img src="logos/bancolombia.png" alt="Bancolombia" class="provider-logo" onerror="this.style.display='none'">
+                    <span>Bancolombia</span>
+                  </div>
+                  <div class="provider-option" data-provider="Davivienda">
+                    <img src="logos/Davivienda.png" alt="Davivienda" class="provider-logo" onerror="this.style.display='none'">
+                    <span>Davivienda</span>
+                  </div>
+                  <div class="provider-option" data-provider="BBVA">
+                    <img src="logos/bbva.png" alt="BBVA" class="provider-logo" onerror="this.style.display='none'">
+                    <span>BBVA</span>
+                  </div>
+                  <div class="provider-option" data-provider="Otros">
+                    <span style="font-size:2rem;">🏦</span>
+                    <span>Otros</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button class="btn-primary" id="payBtn">Pagar</button>
+          </div>
+
+          <div>
+            <div class="summary-card">
+              <div class="summary-header">
+                <h3 style="font-size:1rem;font-weight:700;color:var(--blue);margin:0;">Resumen</h3>
+              </div>
+              <div class="summary-body">
+                <div id="summaryItems"></div>
+                <div class="summary-row"><span>Subtotal</span><span id="subtotal">$0</span></div>
+                <div class="summary-row"><span>Servicio (10%)</span><span id="fee">$0</span></div>
+                <div class="summary-row total"><span>Total</span><span id="total">$0</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { auth, ordersApi } from '/src/supabase.ts';
+
+    let cartItem = null;
+    let selectedPaymentMethod = 'card';
+    let selectedProvider = null;
+
+    async function init() {
+      console.log('🚀 Checkout init');
+      
+      // Verificar autenticación
+      const session = await auth.getSession();
+      if (!session) {
+        localStorage.setItem('redirect-after-login', window.location.pathname);
+        alert('Debes iniciar sesión para continuar');
+        window.location.href = '/login.html';
+        return;
+      }
+
+      const cart = localStorage.getItem('tuboleta-cart');
+      if (!cart) {
+        alert('El carrito está vacío');
+        window.location.href = '/';
+        return;
+      }
+
+      try {
+        cartItem = JSON.parse(cart);
+        renderCart();
+        renderSummary();
+        await prefillUserData();
+        setTimeout(() => {
+          setupPaymentMethods();
+          setupProviders();
+          setupPayButton();
+        }, 200);
+      } catch (error) {
+        console.error('❌ Init error:', error);
+      }
+    }
+
+    async function prefillUserData() {
+      try {
+        const userData = await auth.getUserData();
+        if (userData) {
+          const emailInput = document.getElementById('email');
+          const nameInput = document.getElementById('name');
+          const phoneInput = document.getElementById('phone');
+          
+          if (emailInput && userData.email) {
+            emailInput.value = userData.email;
+            emailInput.readOnly = true;
+          }
+          if (nameInput && userData.name) nameInput.value = userData.name;
+          if (phoneInput && userData.phone) phoneInput.value = userData.phone;
+        }
+      } catch (error) {}
+    }
+
+    function renderCart() {
+      if (!cartItem) return;
+      const container = document.getElementById('orderItems');
+      if (!container) return;
+
+      container.innerHTML = `
+        <div class="order-item">
+          <img src="${cartItem.eventImage}" alt="${cartItem.eventName}">
+          <div class="order-item-info">
+            <h4>${cartItem.eventName}</h4>
+            <p>${cartItem.eventVenue}</p>
+            <p>${cartItem.eventDate}</p>
+            <p style="color:var(--cyan);font-weight:600;">${cartItem.ticketType}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderSummary() {
+      if (!cartItem) return;
+      document.getElementById('subtotal').textContent = formatPrice(cartItem.subtotal || 0);
+      document.getElementById('fee').textContent = formatPrice(cartItem.serviceFee || 0);
+      document.getElementById('total').textContent = formatPrice(cartItem.total || 0);
+
+      const summaryItems = document.getElementById('summaryItems');
+      if (summaryItems) {
+        summaryItems.innerHTML = `
+          <div style="margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--border);">
+            <div style="display:flex;justify-content:space-between;">
+              <span style="font-weight:500;">${cartItem.ticketType}</span>
+              <span>x${cartItem.quantity}</span>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function setupPaymentMethods() {
+      const methods = document.querySelectorAll('.payment-method');
+      if (methods.length === 0) {
+        setTimeout(setupPaymentMethods, 300);
+        return;
+      }
+
+      methods.forEach(method => {
+        method.addEventListener('click', function(e) {
+          e.preventDefault();
+          document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
+          this.classList.add('selected');
+          selectedPaymentMethod = this.dataset.method;
+
+          const cardForm = document.getElementById('cardForm');
+          const transferForm = document.getElementById('transferForm');
+
+          if (selectedPaymentMethod === 'card') {
+            if (cardForm) { cardForm.style.display = 'block'; cardForm.classList.remove('hidden'); }
+            if (transferForm) { transferForm.style.display = 'none'; transferForm.classList.add('hidden'); }
+          } else {
+            if (cardForm) { cardForm.style.display = 'none'; cardForm.classList.add('hidden'); }
+            if (transferForm) { transferForm.style.display = 'block'; transferForm.classList.remove('hidden'); }
+          }
+        }, true);
+      });
+    }
+
+    function setupProviders() {
+      const providers = document.querySelectorAll('.provider-option');
+      providers.forEach(provider => {
+        provider.addEventListener('click', function() {
+          document.querySelectorAll('.provider-option').forEach(p => p.classList.remove('selected'));
+          this.classList.add('selected');
+          selectedProvider = this.dataset.provider;
+        });
+      });
+    }
+
+    function setupPayButton() {
+      const payBtn = document.getElementById('payBtn');
+      if (!payBtn) return;
+
+      payBtn.addEventListener('click', async () => {
+        if (!validateForm()) return;
+        
+        payBtn.disabled = true;
+        payBtn.textContent = 'Procesando...';
+
+        try {
+          if (selectedPaymentMethod === 'card') {
+            await processCardPayment();
+          } else {
+            await processTransferPayment();
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          alert('Error al procesar el pago');
+          payBtn.disabled = false;
+          payBtn.textContent = 'Pagar';
+        }
+      });
+    }
+
+    function validateForm() {
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const docType = document.getElementById('docType').value;
+      const docNumber = document.getElementById('docNumber').value.trim();
+
+      if (!name || !email || !phone || !docType || !docNumber) {
+        alert('Por favor completa todos los campos obligatorios');
+        return false;
+      }
+
+      if (docNumber.length < 6) {
+        alert('El número de documento debe tener al menos 6 caracteres');
+        return false;
+      }
+
+      if (!selectedPaymentMethod) {
+        alert('Selecciona un método de pago');
+        return false;
+      }
+
+      if (selectedPaymentMethod === 'card') {
+        const cardNumber = document.getElementById('cardNumber').value.trim();
+        const cardExpiry = document.getElementById('cardExpiry').value.trim();
+        const cardCvc = document.getElementById('cardCvc').value.trim();
+        const cardName = document.getElementById('cardName').value.trim();
+
+        if (!cardNumber || !cardExpiry || !cardCvc || !cardName) {
+          alert('Completa los datos de la tarjeta');
+          return false;
+        }
+      } else {
+        if (!selectedProvider) {
+          alert('Selecciona un proveedor');
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    async function processCardPayment() {
+      const orderNumber = 'TB-' + Date.now() + Math.floor(Math.random() * 1000);
+      
+      let userData = await auth.getUserData();
+      let userEmail = userData?.email || document.getElementById('email').value;
+
+      const orderData = {
+        order: orderNumber,
+        email: userEmail,
+        name: document.getElementById('name').value,
+        phone: document.getElementById('phone').value,
+        docType: document.getElementById('docType').value,
+        docNumber: document.getElementById('docNumber').value,
+        amount: cartItem.total,
+        items: [cartItem],
+        status: 'completed',
+        date: new Date().toISOString(),
+        paymentMethod: 'card',
+        cardLastFour: document.getElementById('cardNumber').value.slice(-4)
+      };
+
+      // Guardar en localStorage
+      const payments = JSON.parse(localStorage.getItem('tuboleta-card-payments') || '[]');
+      payments.push(orderData);
+      localStorage.setItem('tuboleta-card-payments', JSON.stringify(payments));
+
+      // Guardar en Supabase
+      try {
+        await ordersApi.create({
+          user_id: userData.id,
+          event_id: cartItem.eventId,
+          tickets: { items: [cartItem] },
+          total_amount: cartItem.total,
+          status: 'completed',
+          payment_method: 'card',
+          payment_reference: orderNumber
+        });
+        console.log('✅ Orden guardada en Supabase');
+      } catch (error) {
+        console.error('Error guardando en Supabase:', error);
+      }
+
+      localStorage.removeItem('tuboleta-cart');
+      localStorage.setItem('tuboleta-last-order', JSON.stringify(orderData));
+      window.location.href = '/confirmacion.html';
+    }
+
+    async function processTransferPayment() {
+      const orderNumber = 'TB-' + Date.now() + Math.floor(Math.random() * 1000);
+      const referenceNumber = Math.floor(100000000 + Math.random() * 900000000).toString();
+
+      let userData = await auth.getUserData();
+      let userEmail = userData?.email || document.getElementById('email').value;
+
+      const orderData = {
+        order: orderNumber,
+        email: userEmail,
+        name: document.getElementById('name').value,
+        phone: document.getElementById('phone').value,
+        docType: document.getElementById('docType').value,
+        docNumber: document.getElementById('docNumber').value,
+        amount: cartItem.total,
+        items: [cartItem],
+        status: 'pending',
+        date: new Date().toISOString(),
+        paymentMethod: 'transfer',
+        provider: selectedProvider,
+        ref: referenceNumber
+      };
+
+      const payments = JSON.parse(localStorage.getItem('tuboleta-pending') || '[]');
+      payments.push(orderData);
+      localStorage.setItem('tuboleta-pending', JSON.stringify(payments));
+
+      // Guardar en Supabase
+      try {
+        await ordersApi.create({
+          user_id: userData.id,
+          event_id: cartItem.eventId,
+          tickets: { items: [cartItem] },
+          total_amount: cartItem.total,
+          status: 'pending',
+          payment_method: 'transfer',
+          payment_reference: referenceNumber
+        });
+        console.log('✅ Orden guardada en Supabase');
+      } catch (error) {
+        console.error('Error guardando en Supabase:', error);
+      }
+
+      localStorage.removeItem('tuboleta-cart');
+      localStorage.setItem('tuboleta-last-order', JSON.stringify(orderData));
+      window.location.href = '/confirmacion.html';
+    }
+
+    function formatPrice(price) {
+      return '$' + Math.round(price).toLocaleString('es-CO');
+    }
+
+    // Auto-format
+    setTimeout(() => {
+      const cardNumber = document.getElementById('cardNumber');
+      if (cardNumber) {
+        cardNumber.addEventListener('input', (e) => {
+          let value = e.target.value.replace(/\s/g, '');
+          e.target.value = value.match(/.{1,4}/g)?.join(' ') || value;
+        });
+      }
+
+      const cardExpiry = document.getElementById('cardExpiry');
+      if (cardExpiry) {
+        cardExpiry.addEventListener('input', (e) => {
+          let value = e.target.value.replace(/\D/g, '');
+          if (value.length >= 2) {
+            value = value.slice(0, 2) + '/' + value.slice(2, 4);
+          }
+          e.target.value = value;
+        });
+      }
+    }, 200);
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  </script>
+</body>
+</html>

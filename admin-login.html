@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login - TuBoleta</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --blue: #1a3a4a; --cyan: #00b4d8; --yellow: #f9a825; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, var(--blue) 0%, #0d2830 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .login-box {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      width: 100%;
+      max-width: 400px;
+      overflow: hidden;
+    }
+    .login-header {
+      background: var(--blue);
+      padding: 2rem;
+      text-align: center;
+    }
+    .logo {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: white;
+      text-decoration: none;
+    }
+    .logo span { color: var(--yellow); }
+    .badge {
+      background: var(--cyan);
+      color: white;
+      font-size: 0.65rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-weight: 600;
+    }
+    .login-header p {
+      color: rgba(255,255,255,0.8);
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+    }
+    .login-body { padding: 2rem; }
+    .form-group { margin-bottom: 1.25rem; }
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #333;
+      font-size: 0.9rem;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 0.875rem 1rem;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 1rem;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--cyan);
+    }
+    .form-group input:disabled {
+      background: #f5f5f5;
+      cursor: not-allowed;
+    }
+    .btn-login {
+      width: 100%;
+      padding: 1rem;
+      background: linear-gradient(135deg, var(--yellow) 0%, #f57f17 100%);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn-login:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(249,168,37,0.4);
+    }
+    .btn-login:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .error-msg {
+      background: #fee2e2;
+      color: #991b1b;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      display: none;
+    }
+    .error-msg.show { display: block; }
+    .success-msg {
+      background: #dcfce7;
+      color: #166534;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      display: none;
+    }
+    .success-msg.show { display: block; }
+    .info-box {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 10px;
+      padding: 1rem;
+      margin-top: 1.5rem;
+    }
+    .info-box h4 {
+      color: #1e40af;
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+    .info-box p {
+      color: #1e3a8a;
+      font-size: 0.8rem;
+      line-height: 1.5;
+    }
+    .login-footer {
+      padding: 1.5rem 2rem;
+      text-align: center;
+      border-top: 1px solid #f0f0f0;
+    }
+    .login-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .loading {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      margin-left: 0.5rem;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <div class="login-header">
+      <a href="/" class="logo">Tub<span>o</span>leta<span class="badge">ADMIN</span></a>
+      <p>Panel de Administración</p>
+    </div>
+    <div class="login-body">
+      <div class="error-msg" id="errorMsg"></div>
+      <div class="success-msg" id="successMsg"></div>
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="email">Correo electrónico</label>
+          <input type="email" id="email" placeholder="admin@tuboleta.com" required autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label for="password">Contraseña</label>
+          <input type="password" id="password" placeholder="Tu contraseña" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn-login" id="submitBtn">
+          Iniciar Sesión
+        </button>
+      </form>
+      <div class="info-box">
+        <h4>🔐 Autenticación Segura</h4>
+        <p>
+          Este panel usa autenticación real con Supabase. 
+          Solo usuarios registrados en la tabla <code>admin_users</code> pueden acceder.
+        </p>
+      </div>
+    </div>
+    <div class="login-footer">
+      <a href="/">← Volver al sitio principal</a>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth } from './src/supabase.ts';
+
+    const form = document.getElementById('loginForm');
+    const errorMsg = document.getElementById('errorMsg');
+    const successMsg = document.getElementById('successMsg');
+    const submitBtn = document.getElementById('submitBtn');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+
+    // Verificar si ya hay sesión activa
+    async function checkSession() {
+      try {
+        const session = await auth.getSession();
+        if (session) {
+          const isAdmin = await auth.isAdmin();
+          if (isAdmin) {
+            window.location.href = '/admin.html';
+          }
+        }
+      } catch (error) {
+        console.error('Error checking session:', error);
+      }
+    }
+
+    checkSession();
+
+    // Manejar envío del formulario
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+
+      // Resetear mensajes
+      errorMsg.classList.remove('show');
+      successMsg.classList.remove('show');
+
+      // Validación básica
+      if (!email || !password) {
+        showError('Por favor completa todos los campos');
+        return;
+      }
+
+      // Deshabilitar formulario
+      setLoading(true);
+
+      try {
+        // Intentar login
+        const { user, error } = await auth.signIn(email, password);
+
+        if (error) {
+          throw error;
+        }
+
+        if (!user) {
+          throw new Error('No se pudo iniciar sesión');
+        }
+
+        // Login exitoso
+        showSuccess('¡Acceso concedido! Redirigiendo...');
+        
+        setTimeout(() => {
+          window.location.href = '/admin.html';
+        }, 1000);
+
+      } catch (error) {
+        console.error('Login error:', error);
+        
+        let errorMessage = 'Error al iniciar sesión';
+        
+        if (error.message) {
+          if (error.message.includes('Invalid login credentials')) {
+            errorMessage = 'Credenciales incorrectas. Verifica tu email y contraseña.';
+          } else if (error.message.includes('permisos de administrador')) {
+            errorMessage = 'Tu cuenta no tiene permisos de administrador.';
+          } else if (error.message.includes('Email not confirmed')) {
+            errorMessage = 'Por favor confirma tu email antes de iniciar sesión.';
+          } else {
+            errorMessage = error.message;
+          }
+        }
+        
+        showError(errorMessage);
+        setLoading(false);
+      }
+    });
+
+    function setLoading(loading) {
+      submitBtn.disabled = loading;
+      emailInput.disabled = loading;
+      passwordInput.disabled = loading;
+      
+      if (loading) {
+        submitBtn.innerHTML = 'Iniciando sesión...<span class="loading"></span>';
+      } else {
+        submitBtn.innerHTML = 'Iniciar Sesión';
+      }
+    }
+
+    function showError(message) {
+      errorMsg.textContent = message;
+      errorMsg.classList.add('show');
+    }
+
+    function showSuccess(message) {
+      successMsg.textContent = message;
+      successMsg.classList.add('show');
+    }
+  </script>
+</body>
+</html>

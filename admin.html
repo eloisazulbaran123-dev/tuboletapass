@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Admin - TuBoleta</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{--blue:#1a3a4a;--cyan:#00b4d8;--yellow:#f9a825;--gray:#f5f5f5;--border:#e0e0e0;--white:#fff;--text-light:#666;--radius:12px}
+    body{font-family:'Inter',sans-serif;background:var(--gray)}
+    .container{max-width:1200px;margin:0 auto;padding:0 1rem}
+    .admin-header{background:var(--blue);padding:1rem 0}
+    .admin-header .container{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+    .admin-title{display:flex;align-items:center;gap:1rem}
+    .logo{font-size:1.5rem;font-weight:800;color:white;text-decoration:none}
+    .logo span{color:var(--yellow)}
+    .admin-badge{background:var(--cyan);color:white;font-size:.7rem;padding:.25rem .5rem;border-radius:4px;font-weight:600}
+    .header-right{display:flex;align-items:center;gap:1rem}
+    .admin-user{color:white;font-size:.85rem}
+    .btn-logout{background:rgba(255,255,255,.15);border:none;color:white;padding:.5rem 1rem;border-radius:6px;cursor:pointer;font-size:.85rem}
+    .btn-logout:hover{background:rgba(255,255,255,.25)}
+    .admin-page{padding:2rem 0;min-height:calc(100vh - 70px)}
+    .admin-tabs{display:flex;gap:.5rem;margin-bottom:2rem;flex-wrap:wrap}
+    .admin-tab{padding:.75rem 1.5rem;border-radius:8px;font-size:.9rem;font-weight:600;color:var(--text-light);background:white;border:none;cursor:pointer}
+    .admin-tab.active{background:var(--cyan);color:white}
+    .admin-tab:hover:not(.active){background:#e8e8e8}
+    .tab-content{display:none}
+    .tab-content.active{display:block}
+    .card{background:white;border-radius:var(--radius);padding:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:1.5rem}
+    .card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem}
+    .card-title{font-size:1.1rem;font-weight:700;color:var(--blue)}
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-bottom:2rem}
+    .stat-card{background:white;border-radius:var(--radius);padding:1.25rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+    .stat-card h3{font-size:.8rem;color:var(--text-light);margin-bottom:.5rem}
+    .stat-card .value{font-size:1.75rem;font-weight:800;color:var(--blue)}
+    .stat-card .value.pending{color:#f59e0b}
+    .stat-card .value.confirmed{color:#22c55e}
+    .stat-card .value.completed{color:#22c55e}
+    .stat-card .value.rejected{color:#ef4444}
+    .events-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem}
+    .event-card{background:white;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border)}
+    .event-card img{width:100%;height:150px;object-fit:cover}
+    .event-card-body{padding:1rem}
+    .event-card h4{font-size:.95rem;font-weight:700;color:var(--blue);margin-bottom:.5rem}
+    .event-card p{font-size:.8rem;color:var(--text-light);margin-bottom:.25rem}
+    .event-card-actions{display:flex;gap:.5rem;margin-top:1rem;flex-wrap:wrap}
+    .event-card-actions button{flex:1;padding:.5rem;border-radius:6px;font-size:.8rem;font-weight:600;border:none;cursor:pointer;min-width:70px}
+    .btn-edit{background:var(--blue);color:white}
+    .btn-edit:hover{background:#0d2830}
+    .btn-delete{background:#ef4444;color:white}
+    .btn-delete:hover{background:#dc2626}
+    .form-group{margin-bottom:1rem}
+    .form-group label{display:block;font-size:.85rem;font-weight:600;color:#333;margin-bottom:.5rem}
+    .form-group input,.form-group select,.form-group textarea{width:100%;padding:.75rem;border:1px solid var(--border);border-radius:8px;font-size:.9rem;font-family:inherit}
+    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--cyan)}
+    .form-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem}
+    .btn{padding:.75rem 1.5rem;border-radius:8px;font-size:.9rem;font-weight:600;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:.5rem}
+    .btn-primary{background:var(--cyan);color:white}
+    .btn-primary:hover{background:#0096b7}
+    .btn-secondary{background:var(--gray);color:var(--blue)}
+    .btn-refresh{background:var(--cyan);color:white;padding:.5rem 1rem;border-radius:6px;font-size:.85rem;display:flex;align-items:center;gap:.5rem}
+    .btn-refresh:hover{background:#0096b7}
+    .orders-list{max-height:600px;overflow-y:auto}
+    .order-row{display:grid;grid-template-columns:1fr 1fr auto;gap:1rem;padding:1rem;border-bottom:1px solid var(--border);align-items:start;background:white}
+    .order-row:hover{background:var(--gray)}
+    .order-info h4{font-size:.9rem;font-weight:600;color:var(--blue);margin-bottom:.25rem}
+    .order-info p{font-size:.8rem;color:var(--text-light);margin:.1rem 0}
+    .order-status{display:inline-block;padding:.35rem .75rem;border-radius:20px;font-size:.75rem;font-weight:600;text-transform:uppercase;margin-top:.5rem}
+    .order-status.pending{background:#fef3c7;color:#92400e}
+    .order-status.confirmed{background:#dcfce7;color:#166534}
+    .order-status.completed{background:#dcfce7;color:#166534}
+    .order-status.rejected{background:#fee2e2;color:#991b1b}
+    .order-actions{display:flex;gap:.5rem;flex-wrap:wrap}
+    .action-btn{padding:.5rem .75rem;border-radius:6px;font-size:.8rem;font-weight:500;border:none;cursor:pointer;white-space:nowrap}
+    .action-btn.confirm{background:#22c55e;color:white}
+    .action-btn.confirm:hover{background:#16a34a}
+    .action-btn.reject{background:#ef4444;color:white}
+    .action-btn.reject:hover{background:#dc2626}
+    .filter-tabs{display:flex;gap:.5rem;flex-wrap:wrap}
+    .filter-tab{padding:.5rem 1rem;border-radius:8px;font-size:.85rem;font-weight:500;color:var(--text-light);background:var(--gray);border:none;cursor:pointer}
+    .filter-tab.active{background:var(--cyan);color:white}
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;display:none;align-items:center;justify-content:center;padding:1rem}
+    .modal-overlay.active{display:flex}
+    .modal{background:white;border-radius:var(--radius);width:calc(100% - 2rem);max-width:550px;max-height:90vh;overflow-y:auto}
+    .modal-header{padding:1.25rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+    .modal-header h3{font-size:1.1rem;font-weight:700;color:var(--blue)}
+    .modal-close{background:none;border:none;cursor:pointer;font-size:1.5rem;color:var(--text-light);line-height:1}
+    .modal-body{padding:1.25rem}
+    .modal-footer{padding:1.25rem;border-top:1px solid var(--border);display:flex;gap:1rem;justify-content:flex-end}
+    .toast{position:fixed;bottom:2rem;right:2rem;background:var(--blue);color:white;padding:1rem 1.5rem;border-radius:8px;display:none;z-index:200;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .toast.success{background:#22c55e}
+    .toast.error{background:#ef4444}
+    .toast.show{display:block;animation:slideIn .3s ease}
+    @keyframes slideIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+    .empty-state{padding:3rem;text-align:center;color:var(--text-light)}
+    .order-details{background:var(--gray);border-radius:8px;padding:1rem;margin-top:.5rem}
+    .order-details h5{font-size:.85rem;font-weight:600;color:var(--blue);margin-bottom:.5rem}
+    .order-items{display:flex;flex-direction:column;gap:.5rem}
+    .order-item{display:flex;justify-content:space-between;font-size:.8rem;color:var(--text-light)}
+    .qr-preview{max-width:200px;max-height:200px;margin:1rem auto;display:block;border:1px solid var(--border);border-radius:8px;padding:.5rem;background:white;object-fit:contain}
+    .file-upload-area{border:2px dashed var(--border);border-radius:8px;padding:2rem;text-align:center;cursor:pointer;transition:all .2s;background:white}
+    .file-upload-area:hover{border-color:var(--cyan);background:rgba(0,180,216,.05)}
+    .file-upload-area.dragover{border-color:var(--cyan);background:rgba(0,180,216,.1)}
+    @media(max-width:768px){.order-row{grid-template-columns:1fr}.header-right{width:100%;justify-content:space-between}.order-actions{width:100%}}
+  </style>
+</head>
+<body>
+  <header class="admin-header">
+    <div class="container">
+      <div class="admin-title">
+        <a href="/" class="logo">Tub<span>o</span>leta</a>
+        <span class="admin-badge">ADMIN</span>
+      </div>
+      <div class="header-right">
+        <span class="admin-user">Admin</span>
+        <button class="btn-logout" onclick="window.location.href='/'">Cerrar Sesión</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="admin-page">
+    <div class="container">
+      <div class="admin-tabs">
+        <button class="admin-tab active" data-tab="orders">Órdenes</button>
+        <button class="admin-tab" data-tab="events">Eventos</button>
+        <button class="admin-tab" data-tab="settings">Configuración</button>
+      </div>
+
+      <!-- ÓRDENES TAB -->
+      <div class="tab-content active" id="tab-orders">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <h3>Total Órdenes</h3>
+            <div class="value" id="totalOrders">0</div>
+          </div>
+          <div class="stat-card">
+            <h3>Pendientes</h3>
+            <div class="value pending" id="pendingOrders">0</div>
+          </div>
+          <div class="stat-card">
+            <h3>Confirmadas</h3>
+            <div class="value confirmed" id="confirmedOrders">0</div>
+          </div>
+          <div class="stat-card">
+            <h3>Completadas</h3>
+            <div class="value completed" id="completedOrders">0</div>
+          </div>
+        </div>
+        
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Órdenes de Pago</h2>
+            <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;">
+              <div class="filter-tabs">
+                <button class="filter-tab active" data-filter="all">Todas</button>
+                <button class="filter-tab" data-filter="pending">Pendientes</button>
+                <button class="filter-tab" data-filter="completed">Completadas</button>
+                <button class="filter-tab" data-filter="confirmed">Confirmadas</button>
+                <button class="filter-tab" data-filter="rejected">Rechazadas</button>
+              </div>
+              <button class="btn-refresh" onclick="loadOrders()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0118.8-4.3M22 12.5a10 10 0 01-18.8 4.2"/>
+                </svg>
+                Actualizar
+              </button>
+            </div>
+          </div>
+          <div class="orders-list" id="ordersList">
+            <div class="empty-state">Cargando órdenes...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EVENTOS TAB -->
+      <div class="tab-content" id="tab-events">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Gestión de Eventos</h2>
+            <button class="btn btn-primary" onclick="openEventModal()">+ Nuevo Evento</button>
+          </div>
+          <div class="events-grid" id="eventsGrid">
+            <div class="empty-state">Cargando eventos desde Supabase...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONFIGURACIÓN TAB -->
+      <div class="tab-content" id="tab-settings">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Configuración de QR de Pago</h2>
+          </div>
+          <form id="qrConfigForm">
+            <div class="form-group">
+              <label>Nombre de la cuenta</label>
+              <input type="text" id="accountName" placeholder="TuBoleta SAS">
+            </div>
+            <div class="form-group">
+              <label>Número de cuenta</label>
+              <input type="text" id="accountNumber" placeholder="1234567890">
+            </div>
+            <div class="form-group">
+              <label>Banco</label>
+              <input type="text" id="bankName" placeholder="Bancolombia">
+            </div>
+            <div class="form-group">
+              <label>NIT</label>
+              <input type="text" id="nit" placeholder="900123456-7">
+            </div>
+            <div class="form-group">
+              <label>Subir código QR</label>
+              <div class="file-upload-area" id="qrUploadArea">
+                <input type="file" id="qrFileInput" accept="image/*" style="display:none">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 1rem;display:block;color:var(--cyan)">
+                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                </svg>
+                <p style="color:var(--blue);font-weight:600;margin-bottom:.5rem">Click para subir o arrastra el archivo</p>
+                <p style="color:var(--text-light);font-size:.8rem">PNG, JPG o SVG (máx. 2MB)</p>
+              </div>
+            </div>
+            <div class="form-group" id="qrPreviewContainer" style="display:none;">
+              <label>Vista previa del QR</label>
+              <img id="qrPreview" class="qr-preview" alt="QR Preview">
+              <button type="button" class="btn btn-secondary" onclick="removeQR()" style="display:block;margin:1rem auto 0;">Eliminar QR</button>
+            </div>
+            <button type="submit" class="btn btn-primary">Guardar Configuración</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Event Modal -->
+  <div class="modal-overlay" id="eventModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modalTitle">Nuevo Evento</h3>
+        <button class="modal-close" onclick="closeEventModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="eventForm">
+          <input type="hidden" id="eventId">
+          <div class="form-group">
+            <label>Título</label>
+            <input type="text" id="title" required>
+          </div>
+          <div class="form-group">
+            <label>Imagen URL</label>
+            <input type="url" id="image" required>
+          </div>
+          <div class="form-group">
+            <label>Lugar</label>
+            <input type="text" id="venue" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Ciudad</label>
+              <select id="city" required>
+                <option value="Bogota">Bogotá</option>
+                <option value="Medellin">Medellín</option>
+                <option value="Cali">Cali</option>
+                <option value="Barranquilla">Barranquilla</option>
+                <option value="Cartagena">Cartagena</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Categoría</label>
+              <select id="category" required>
+                <option value="concierto">Concierto</option>
+                <option value="festival">Festival</option>
+                <option value="teatro">Teatro</option>
+                <option value="deportes">Deportes</option>
+                <option value="otro">Otro</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Precio Base</label>
+            <input type="number" id="price" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Día</label>
+              <input type="text" id="date_day" placeholder="15" required>
+            </div>
+            <div class="form-group">
+              <label>Mes</label>
+              <input type="text" id="date_month" placeholder="MAR" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Fecha Completa</label>
+            <input type="text" id="date_full" placeholder="15-17 Marzo 2026" required>
+          </div>
+          <div class="form-group">
+            <label>Hora</label>
+            <input type="text" id="time" placeholder="7:00 PM" required>
+          </div>
+          <div class="form-group">
+            <label>Descripción</label>
+            <textarea id="description" rows="3"></textarea>
+            <!-- LOCALIDADES -->
+<div class="form-group">
+  <label style="display:flex;justify-content:space-between;align-items:center;">
+    <span>Localidades / Tipos de Boleta</span>
+    <button type="button" onclick="addTicketType()" style="padding:0.5rem 1rem;background:var(--cyan);color:white;border:none;border-radius:6px;font-size:0.85rem;cursor:pointer;">
+      + Agregar Localidad
+    </button>
+  </label>
+  <div id="ticketTypes" style="display:flex;flex-direction:column;gap:0.75rem;margin-top:0.75rem;">
+    <!-- Las localidades se agregarán aquí -->
+  </div>
+</div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeEventModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveEvent()">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script type="module">
+    import { eventsApi, ticketsApi, formatPrice, supabase } from '/src/supabase.ts';
+
+    let currentFilter = 'all';
+    let allOrders = [];
+    let allEvents = [];
+    let editingEventId = null;
+    let qrImageBase64 = null;
+    
+    // ===== GESTIÓN DE LOCALIDADES =====
+let ticketTypes = [];
+let ticketIdCounter = 1;
+
+window.addTicketType = function() {
+  const ticketId = ticketIdCounter++;
+  ticketTypes.push({ id: ticketId, type: '', price: 0, quantity: 0 });
+  renderTicketTypes();
+};
+
+window.removeTicketType = function(ticketId) {
+  ticketTypes = ticketTypes.filter(t => t.id !== ticketId);
+  renderTicketTypes();
+};
+
+window.updateTicketType = function(ticketId, field, value) {
+  const ticket = ticketTypes.find(t => t.id === ticketId);
+  if (ticket) ticket[field] = value;
+};
+
+function renderTicketTypes() {
+  const container = document.getElementById('ticketTypes');
+  if (!container) return;
+
+  if (ticketTypes.length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-light);background:var(--gray);border-radius:8px;"><p>No hay localidades. Haz clic en "+ Agregar Localidad"</p></div>';
+    return;
+  }
+
+  container.innerHTML = ticketTypes.map(ticket => `
+    <div class="ticket-type-item">
+      <div>
+        <label>Tipo</label>
+        <input type="text" placeholder="General, VIP, Platea" value="${ticket.type}" onchange="updateTicketType(${ticket.id}, 'type', this.value)">
+      </div>
+      <div>
+        <label>Precio</label>
+        <input type="number" placeholder="50000" value="${ticket.price || ''}" onchange="updateTicketType(${ticket.id}, 'price', parseInt(this.value) || 0)">
+      </div>
+      <div>
+        <label>Cantidad</label>
+        <input type="number" placeholder="100" value="${ticket.quantity || ''}" onchange="updateTicketType(${ticket.id}, 'quantity', parseInt(this.value) || 0)">
+      </div>
+      <div>
+        <button type="button" onclick="removeTicketType(${ticket.id})" style="padding:0.5rem;background:#ef4444;color:white;border:none;border-radius:6px;cursor:pointer;" title="Eliminar">Eliminar</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function loadEventTickets(eventId) {
+  ticketTypes = [];
+  ticketIdCounter = 1;
+  try {
+    const tickets = await ticketsApi.getByEventId(eventId);
+    tickets.forEach(ticket => {
+      ticketTypes.push({
+        id: ticketIdCounter++,
+        ticketId: ticket.id,
+        type: ticket.type,
+        price: ticket.price,
+        quantity: ticket.quantity
+      });
+    });
+    renderTicketTypes();
+  } catch (error) {
+    console.error('Error al cargar localidades:', error);
+  }
+}
+
+async function saveEventTickets(eventId) {
+  if (ticketTypes.length === 0) return;
+
+  for (const ticket of ticketTypes) {
+    const ticketData = {
+      event_id: eventId,
+      type: ticket.type,
+      price: ticket.price,
+      quantity: ticket.quantity,
+      available: ticket.quantity
+    };
+
+    if (ticket.ticketId) {
+      await ticketsApi.update(ticket.ticketId, ticketData);
+    } else {
+      const { error } = await supabase.from('tickets').insert([ticketData]);
+      if (error) throw error;
+    }
+  }
+}
+
+    // ===== ÓRDENES =====
+    function loadOrders() {
+      const list = document.getElementById('ordersList');
+      if (list) list.innerHTML = '<div class="empty-state">Cargando...</div>';
+
+      setTimeout(() => {
+        try {
+          const cardPayments = JSON.parse(localStorage.getItem('tuboleta-card-payments') || '[]');
+          const pendingPayments = JSON.parse(localStorage.getItem('tuboleta-pending') || '[]');
+          
+          allOrders = [
+            ...cardPayments.map(p => ({
+              ...p,
+              id: p.order,
+              order_number: p.order,
+              user_name: p.name,
+              user_email: p.email,
+              user_phone: p.phone || 'N/A',
+              created_at: p.date,
+              payment_method: 'Tarjeta',
+              payment_ref: p.cardLastFour ? `**** ${p.cardLastFour}` : 'N/A'
+            })),
+            ...pendingPayments.map(p => ({
+              ...p,
+              id: p.order,
+              order_number: p.order,
+              user_name: p.name,
+              user_email: p.email,
+              user_phone: p.phone || 'N/A',
+              created_at: p.date,
+              payment_method: p.provider,
+              payment_ref: p.ref
+            }))
+          ];
+
+          allOrders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+          updateOrdersStats();
+          renderOrders();
+        } catch (error) {
+          console.error('Error:', error);
+          if (list) list.innerHTML = '<div class="empty-state">Error al cargar órdenes</div>';
+        }
+      }, 300);
+    }
+
+    function updateOrdersStats() {
+      const total = allOrders.length;
+      const pending = allOrders.filter(o => o.status === 'pending').length;
+      const confirmed = allOrders.filter(o => o.status === 'confirmed').length;
+      const completed = allOrders.filter(o => o.status === 'completed').length;
+
+      document.getElementById('totalOrders').textContent = total;
+      document.getElementById('pendingOrders').textContent = pending;
+      document.getElementById('confirmedOrders').textContent = confirmed;
+      document.getElementById('completedOrders').textContent = completed;
+    }
+
+    function renderOrders() {
+      const list = document.getElementById('ordersList');
+      if (!list) return;
+
+      let orders = currentFilter === 'all' ? allOrders : allOrders.filter(o => o.status === currentFilter);
+
+      if (orders.length === 0) {
+        list.innerHTML = '<div class="empty-state">No hay órdenes</div>';
+        return;
+      }
+
+      list.innerHTML = orders.map(order => {
+        const statusText = {
+          'pending': 'Pendiente',
+          'confirmed': 'Confirmada',
+          'completed': 'Completada',
+          'rejected': 'Rechazada'
+        }[order.status] || order.status;
+
+        return `
+          <div class="order-row">
+            <div class="order-info">
+              <h4>${order.order_number}</h4>
+              <p><strong>${order.user_name}</strong></p>
+              <p>📧 ${order.user_email}</p>
+              <p>📱 ${order.user_phone}</p>
+              <p>🕐 ${new Date(order.created_at).toLocaleString('es-CO')}</p>
+              <div class="order-details">
+                <h5>Items:</h5>
+                <div class="order-items">
+                  ${order.items.map(item => `
+                    <div class="order-item">
+                      <span>${item.eventName} - ${item.ticketType} x${item.quantity}</span>
+                      <span>$${Math.round(item.subtotal).toLocaleString('es-CO')}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+            <div class="order-info">
+              <p style="font-weight:700;color:var(--cyan);font-size:1.1rem;">$${Math.round(order.amount).toLocaleString('es-CO')}</p>
+              <p style="margin-top:0.5rem;"><strong>Método:</strong> ${order.payment_method}</p>
+              <p><strong>Ref:</strong> ${order.payment_ref}</p>
+              <span class="order-status ${order.status}">${statusText}</span>
+            </div>
+            <div class="order-actions">
+              ${order.status === 'pending' ? `
+                <button class="action-btn confirm" onclick="window.confirmOrder('${order.id}')">✓ Confirmar</button>
+                <button class="action-btn reject" onclick="window.rejectOrder('${order.id}')">✗ Rechazar</button>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    window.confirmOrder = function(orderId) {
+      if (!confirm('¿Confirmar esta orden?')) return;
+      updateOrderStatus(orderId, 'confirmed');
+      showToast('Orden confirmada', 'success');
+      loadOrders();
+    };
+
+    window.rejectOrder = function(orderId) {
+      if (!confirm('¿Rechazar esta orden?')) return;
+      updateOrderStatus(orderId, 'rejected');
+      showToast('Orden rechazada', 'error');
+      loadOrders();
+    };
+
+    function updateOrderStatus(orderId, status) {
+      const cardPayments = JSON.parse(localStorage.getItem('tuboleta-card-payments') || '[]');
+      const cardIndex = cardPayments.findIndex(p => p.order === orderId);
+      if (cardIndex !== -1) {
+        cardPayments[cardIndex].status = status;
+        localStorage.setItem('tuboleta-card-payments', JSON.stringify(cardPayments));
+      }
+
+      const pendingPayments = JSON.parse(localStorage.getItem('tuboleta-pending') || '[]');
+      const pendingIndex = pendingPayments.findIndex(p => p.order === orderId);
+      if (pendingIndex !== -1) {
+        pendingPayments[pendingIndex].status = status;
+        localStorage.setItem('tuboleta-pending', JSON.stringify(pendingPayments));
+      }
+    }
+
+    // ===== EVENTOS DESDE SUPABASE =====
+    async function loadEvents() {
+      const grid = document.getElementById('eventsGrid');
+      if (grid) grid.innerHTML = '<div class="empty-state">Cargando eventos desde Supabase...</div>';
+
+      try {
+        allEvents = await eventsApi.getAll();
+        console.log('Eventos cargados desde Supabase:', allEvents.length);
+        renderEvents();
+      } catch (error) {
+        console.error('Error al cargar eventos:', error);
+        if (grid) grid.innerHTML = '<div class="empty-state">Error al cargar eventos. Verifica tu conexión con Supabase.</div>';
+      }
+    }
+
+    function renderEvents() {
+      const grid = document.getElementById('eventsGrid');
+      if (!grid) return;
+
+      if (!allEvents || allEvents.length === 0) {
+        grid.innerHTML = '<div class="empty-state">No hay eventos. Crea uno nuevo.</div>';
+        return;
+      }
+
+      grid.innerHTML = allEvents.map(event => `
+        <div class="event-card">
+          <img src="${event.image}" alt="${event.title}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22200%22%3E%3Crect fill=%22%23e5e7eb%22 width=%22400%22 height=%22200%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23666%22 font-size=%2218%22%3EEvento%3C/text%3E%3C/svg%3E'">
+          <div class="event-card-body">
+            <h4>${event.title}</h4>
+            <p>${event.venue}, ${event.city}</p>
+            <p>${event.date_full}</p>
+            <p>${event.category}</p>
+            <p style="font-weight:700;color:var(--cyan)">${formatPrice(event.price)}</p>
+            <div class="event-card-actions">
+              <button class="btn-edit" onclick="window.editEvent(${event.id})">Editar</button>
+              <button class="btn-delete" onclick="window.deleteEvent(${event.id})">Eliminar</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    window.openEventModal = function(eventId = null) {
+      ticketTypes = [];
+      ticketIdCounter = 1;
+      editingEventId = eventId;
+      const modal = document.getElementById('eventModal');
+      
+      if (eventId) {
+        loadEventTickets(eventId);
+        } else {
+          renderTicketTypes();
+          }
+
+      if (eventId) {
+        const event = allEvents.find(e => e.id === eventId);
+        if (!event) return;
+        
+        document.getElementById('modalTitle').textContent = 'Editar Evento';
+        document.getElementById('eventId').value = event.id;
+        document.getElementById('title').value = event.title;
+        document.getElementById('image').value = event.image;
+        document.getElementById('venue').value = event.venue;
+        document.getElementById('city').value = event.city;
+        document.getElementById('category').value = event.category;
+        document.getElementById('price').value = event.price;
+        document.getElementById('date_day').value = event.date_day;
+        document.getElementById('date_month').value = event.date_month;
+        document.getElementById('date_full').value = event.date_full;
+        document.getElementById('time').value = event.time;
+        document.getElementById('description').value = event.description || '';
+      } else {
+        document.getElementById('modalTitle').textContent = 'Nuevo Evento';
+        document.getElementById('eventForm').reset();
+        document.getElementById('eventId').value = '';
+      }
+      
+      modal.classList.add('active');
+    };
+
+    window.closeEventModal = function() {
+      document.getElementById('eventModal').classList.remove('active');
+      editingEventId = null;
+    };
+
+    window.editEvent = function(eventId) {
+      window.openEventModal(eventId);
+    };
+
+    window.deleteEvent = async function(eventId) {
+      if (!confirm('¿Eliminar este evento?')) return;
+      
+      try {
+        await eventsApi.delete(eventId);
+        showToast('Evento eliminado', 'success');
+        await loadEvents();
+      } catch (error) {
+        console.error('Error:', error);
+        showToast('Error al eliminar evento', 'error');
+      }
+    };
+
+    window.saveEvent = async function() {
+      const title = document.getElementById('title').value;
+      const image = document.getElementById('image').value;
+      const venue = document.getElementById('venue').value;
+      const city = document.getElementById('city').value;
+      const category = document.getElementById('category').value;
+      const price = parseInt(document.getElementById('price').value);
+      const date_day = document.getElementById('date_day').value;
+      const date_month = document.getElementById('date_month').value;
+      const date_full = document.getElementById('date_full').value;
+      const time = document.getElementById('time').value;
+      const description = document.getElementById('description').value;
+
+      if (!title || !image || !venue || !city || !category || !price || !date_day || !date_month || !date_full || !time) {
+        alert('Por favor completa todos los campos obligatorios');
+        return;
+      }
+      if (ticketTypes.length === 0) {
+  alert('Debes agregar al menos una localidad');
+  return;
+}
+
+for (const ticket of ticketTypes) {
+  if (!ticket.type || !ticket.price || !ticket.quantity) {
+    alert('Completa todos los campos de las localidades');
+    return;
+  }
+}
+      const eventData = {
+        title, image, venue, city, category, price,
+        date_day, date_month, date_full, time, description
+      };
+
+      try {
+        if (editingEventId) {
+  await eventsApi.update(editingEventId, eventData);
+  await saveEventTickets(editingEventId);
+  showToast('Evento actualizado', 'success');
+} else {
+  const newEvent = await eventsApi.create(eventData);
+  await saveEventTickets(newEvent.id);
+  showToast('Evento creado', 'success');
+}
+
+        window.closeEventModal();
+        await loadEvents();
+      } catch (error) {
+        console.error('Error:', error);
+        showToast('Error al guardar evento: ' + error.message, 'error');
+      }
+    };
+
+    // ===== CONFIGURACIÓN QR CON UPLOAD =====
+    function loadQRConfig() {
+      const config = JSON.parse(localStorage.getItem('tuboleta-qr-config') || '{}');
+      
+      document.getElementById('accountName').value = config.accountName || '';
+      document.getElementById('accountNumber').value = config.accountNumber || '';
+      document.getElementById('bankName').value = config.bankName || '';
+      document.getElementById('nit').value = config.nit || '';
+      
+      if (config.qrImage) {
+        qrImageBase64 = config.qrImage;
+        document.getElementById('qrPreview').src = config.qrImage;
+        document.getElementById('qrPreviewContainer').style.display = 'block';
+      }
+    }
+
+    const qrUploadArea = document.getElementById('qrUploadArea');
+    const qrFileInput = document.getElementById('qrFileInput');
+
+    if (qrUploadArea && qrFileInput) {
+      qrUploadArea.addEventListener('click', () => qrFileInput.click());
+
+      qrFileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        if (file.size > 2 * 1024 * 1024) {
+          alert('El archivo es muy grande. Máximo 2MB.');
+          return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          qrImageBase64 = e.target.result;
+          document.getElementById('qrPreview').src = qrImageBase64;
+          document.getElementById('qrPreviewContainer').style.display = 'block';
+          showToast('QR cargado. Haz click en Guardar para aplicar.', 'success');
+        };
+        reader.readAsDataURL(file);
+      });
+
+      qrUploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        qrUploadArea.classList.add('dragover');
+      });
+
+      qrUploadArea.addEventListener('dragleave', () => {
+        qrUploadArea.classList.remove('dragover');
+      });
+
+      qrUploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        qrUploadArea.classList.remove('dragover');
+        
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) {
+          if (file.size > 2 * 1024 * 1024) {
+            alert('El archivo es muy grande. Máximo 2MB.');
+            return;
+          }
+          
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            qrImageBase64 = e.target.result;
+            document.getElementById('qrPreview').src = qrImageBase64;
+            document.getElementById('qrPreviewContainer').style.display = 'block';
+            showToast('QR cargado. Haz click en Guardar para aplicar.', 'success');
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    }
+
+    const qrConfigForm = document.getElementById('qrConfigForm');
+    if (qrConfigForm) {
+      qrConfigForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const config = {
+          accountName: document.getElementById('accountName').value,
+          accountNumber: document.getElementById('accountNumber').value,
+          bankName: document.getElementById('bankName').value,
+          nit: document.getElementById('nit').value,
+          qrImage: qrImageBase64
+        };
+        
+        localStorage.setItem('tuboleta-qr-config', JSON.stringify(config));
+        showToast('Configuración guardada', 'success');
+      });
+    }
+
+    window.removeQR = function() {
+      qrImageBase64 = null;
+      document.getElementById('qrPreview').src = '';
+      document.getElementById('qrPreviewContainer').style.display = 'none';
+      qrFileInput.value = '';
+    };
+
+    // ===== UTILIDADES =====
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      if (!toast) return;
+      
+      toast.textContent = message;
+      toast.className = `toast ${type} show`;
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // Setup tabs
+    document.querySelectorAll('.admin-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
+        
+        if (tab.dataset.tab === 'events') {
+          loadEvents();
+        } else if (tab.dataset.tab === 'settings') {
+          loadQRConfig();
+        }
+      });
+    });
+
+    // Setup filter tabs
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentFilter = tab.dataset.filter;
+        renderOrders();
+      });
+    });
+
+    // Initialize
+    loadOrders();
+    loadEvents();
+    loadQRConfig();
+  </script>
+</body>
+</html>

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mis Órdenes - TuBoleta</title>
+  <link rel="stylesheet" href="/src/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    .orders-page { padding: 2rem 0; background: var(--gray); min-height: 80vh; }
+    .page-header { background: var(--blue); padding: 2rem 0; margin-bottom: 2rem; }
+    .page-header h1 { color: white; font-size: 2rem; margin-bottom: 0.5rem; }
+    .page-header p { color: rgba(255,255,255,0.8); }
+    .orders-filters { display: flex; gap: 0.5rem; margin-bottom: 2rem; flex-wrap: wrap; }
+    .filter-btn { padding: 0.5rem 1rem; border-radius: 8px; border: none; background: white; color: var(--text-light); font-weight: 500; cursor: pointer; transition: all 0.2s; }
+    .filter-btn.active { background: var(--cyan); color: white; }
+    .order-card { background: white; border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .order-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+    .order-number { font-size: 1.1rem; font-weight: 700; color: var(--blue); }
+    .order-date { font-size: 0.85rem; color: var(--text-light); margin-top: 0.25rem; }
+    .order-status { padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+    .order-status.pending { background: #fef3c7; color: #92400e; }
+    .order-status.confirmed { background: #dcfce7; color: #166534; }
+    .order-status.completed { background: #dcfce7; color: #166534; }
+    .order-status.rejected { background: #fee2e2; color: #991b1b; }
+    .order-items { margin-bottom: 1rem; }
+    .order-item { display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--gray); }
+    .order-item:last-child { border-bottom: none; }
+    .order-item-name { font-weight: 500; color: var(--blue); }
+    .order-item-details { font-size: 0.85rem; color: var(--text-light); }
+    .order-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; border-top: 1px solid var(--border); }
+    .order-total { font-size: 1.25rem; font-weight: 700; color: var(--cyan); }
+    .order-actions { display: flex; gap: 0.5rem; }
+    .btn-view { padding: 0.5rem 1rem; background: var(--cyan); color: rgb(255, 255, 255); border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.9rem; }
+    .empty-orders { text-align: center; padding: 4rem 2rem; }
+    .empty-orders svg { margin: 0 auto 1.5rem; display: block; opacity: 0.3; }
+    @media (max-width: 768px) { .order-header, .order-footer { flex-direction: column; align-items: start; gap: 1rem; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+       <a href="/" class="logo">
+  <img src="public/logos/tuboleta-logo-azul.png" alt="Tuboleta" style="height:35px;width:auto;" />
+</a>
+      <nav>
+        <a href="/">Eventos</a>
+        <a href="/mis-ordenes.html" class="active">Mis Órdenes</a>
+        <div id="auth-ui-header"></div>
+      </nav>
+    </div>
+  </header>
+
+  <div class="page-header">
+    <div class="container">
+      <h1>Mis Órdenes</h1>
+      <p>Gestiona y revisa tus compras de boletas</p>
+    </div>
+  </div>
+
+  <main class="orders-page">
+    <div class="container">
+      <div class="orders-filters">
+        <button class="filter-btn active" data-status="all">Todas</button>
+        <button class="filter-btn" data-status="completed">Completadas</button>
+        <button class="filter-btn" data-status="pending">Pendientes</button>
+        <button class="filter-btn" data-status="confirmed">Confirmadas</button>
+        <button class="filter-btn" data-status="rejected">Rechazadas</button>
+      </div>
+
+      <div id="ordersList">
+        <div style="text-align:center;padding:3rem;color:var(--text-light);">Cargando órdenes...</div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { auth } from '/src/supabase.ts';
+
+    let currentFilter = 'all';
+    let userOrders = [];
+
+async function checkAuth() {
+  const session = await auth.getSession();
+  if (!session) {
+    window.location.href = '/login.html';
+    return false;
+  }
+  return true;
+}
+
+// Llamar al cargar la página
+checkAuth();
+
+
+    async function loadOrders() {
+      const isAuth = await checkAuth();
+      if (!isAuth) return;
+
+      try {
+        const userData = await auth.getUserData();
+        const userEmail = userData?.email;
+
+        if (!userEmail) {
+          throw new Error('No se pudo obtener el email del usuario');
+        }
+
+        // Cargar órdenes del usuario desde localStorage
+        const cardPayments = JSON.parse(localStorage.getItem('tuboleta-card-payments') || '[]');
+        const pendingPayments = JSON.parse(localStorage.getItem('tuboleta-pending') || '[]');
+
+        // Filtrar solo las órdenes del usuario actual
+        userOrders = [
+          ...cardPayments.filter(p => p.email === userEmail),
+          ...pendingPayments.filter(p => p.email === userEmail)
+        ];
+
+        // Ordenar por fecha (más reciente primero)
+        userOrders.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        renderOrders();
+      } catch (error) {
+        console.error('Error loading orders:', error);
+        document.getElementById('ordersList').innerHTML = `
+          <div class="empty-orders">
+            <p>Error al cargar las órdenes</p>
+          </div>
+        `;
+      }
+    }
+
+    function renderOrders() {
+      const container = document.getElementById('ordersList');
+      
+      let orders = currentFilter === 'all' 
+        ? userOrders 
+        : userOrders.filter(o => o.status === currentFilter);
+
+      if (orders.length === 0) {
+        container.innerHTML = `
+          <div class="empty-orders">
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <path d="M3 9h18"/>
+            </svg>
+            <h2 style="color:var(--blue);margin-bottom:0.5rem;">No tienes órdenes</h2>
+            <p style="color:var(--text-light);margin-bottom:1.5rem;">Cuando compres boletas, aparecerán aquí</p>
+            <a href="/" style="display:inline-block;padding:0.75rem 1.5rem;background:var(--cyan);color:white;border-radius:8px;text-decoration:none;font-weight:600;">Ver Eventos</a>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = orders.map(order => {
+        const statusText = {
+          'pending': 'Pendiente',
+          'confirmed': 'Confirmada',
+          'completed': 'Completada',
+          'rejected': 'Rechazada'
+        }[order.status] || order.status;
+
+        const paymentMethod = order.paymentMethod === 'card' 
+          ? 'Tarjeta' 
+          : (order.provider || 'Transferencia');
+
+        return `
+          <div class="order-card">
+            <div class="order-header">
+              <div>
+                <div class="order-number">${order.order}</div>
+                <div class="order-date">${new Date(order.date).toLocaleString('es-CO', { 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}</div>
+              </div>
+              <span class="order-status ${order.status}">${statusText}</span>
+            </div>
+
+            <div class="order-items">
+              ${order.items.map(item => `
+                <div class="order-item">
+                  <div>
+                    <div class="order-item-name">${item.eventName}</div>
+                    <div class="order-item-details">${item.ticketType} • Cantidad: ${item.quantity}</div>
+                  </div>
+                  <div style="text-align:right;">
+                    <div style="font-weight:600;color:var(--blue);">$${Math.round(item.subtotal).toLocaleString('es-CO')}</div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+
+            <div class="order-footer">
+              <div>
+                <div style="font-size:0.85rem;color:var(--text-light);margin-bottom:0.25rem;">
+                  Método de pago: ${paymentMethod}
+                </div>
+                ${order.ref ? `
+                  <div style="font-size:0.85rem;color:var(--text-light);">
+                    Ref: ${order.ref}
+                  </div>
+                ` : ''}
+              </div>
+              <div class="order-total">
+                Total: $${Math.round(order.amount).toLocaleString('es-CO')}
+              </div>
+            </div>
+            
+            ${order.status === 'pending' && !order.paymentConfirmed ? `
+              <button 
+                onclick="confirmPayment('${order.order}')" 
+                style="width:100%;margin-top:1rem;padding:1rem;background:var(--cyan);color:white;border:none;border-radius:10px;font-weight:600;cursor:pointer;transition:transform 0.2s;"
+                onmouseover="this.style.transform='translateY(-2px)'"
+                onmouseout="this.style.transform='translateY(0)'"
+              >
+                ✅ Confirmar que ya pagué
+              </button>
+            ` : ''}
+
+            ${order.paymentConfirmed ? `
+              <div style="background:#eff6ff;border:1px solid #3b82f6;border-radius:10px;padding:1rem;margin-top:1rem;text-align:center;">
+                <p style="color:#1e40af;margin:0;font-size:0.9rem;">
+                  ⏳ <strong>Pago reportado</strong><br>
+                  <span style="font-size:0.85rem;">Cuando esta orden sea confirmada, te llegará un correo con los datos de tus entradas.</span>
+                </p>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Filter buttons
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.dataset.status;
+        renderOrders();
+      });
+    });
+
+    // Confirm payment function
+    window.confirmPayment = function(orderNumber) {
+      if (!confirm('¿Confirmas que ya realizaste el pago de esta orden?')) {
+        return;
+      }
+
+      console.log('✅ Confirmando pago para orden:', orderNumber);
+
+      // Actualizar en pendientes
+      const pendingPayments = JSON.parse(localStorage.getItem('tuboleta-pending') || '[]');
+      const updatedPending = pendingPayments.map(order => {
+        if (order.order === orderNumber) {
+          return { ...order, paymentConfirmed: true, confirmedAt: new Date().toISOString() };
+        }
+        return order;
+      });
+      localStorage.setItem('tuboleta-pending', JSON.stringify(updatedPending));
+      
+      // Mostrar mensaje
+      showConfirmationMessage();
+      setTimeout(() => loadOrders(), 2000);
+    };
+
+    function showConfirmationMessage() {
+      const overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9999;animation:fadeIn 0.3s ease;';
+
+      const message = document.createElement('div');
+      message.style.cssText = 'background:white;border-radius:20px;padding:3rem;max-width:500px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:scaleIn 0.3s ease;';
+
+      message.innerHTML = `
+        <div style="width:80px;height:80px;background:linear-gradient(135deg,#34d399,#10b981);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 2rem;">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+        <h2 style="color:var(--blue);margin-bottom:1rem;">¡Pago Confirmado!</h2>
+        <p style="color:var(--text-light);line-height:1.6;margin-bottom:2rem;">
+          Hemos registrado tu confirmación de pago.<br>
+          <strong>Cuando un administrador verifique tu transferencia, recibirás un correo de confirmación con los datos de tus entradas.</strong>
+        </p>
+        <button 
+          onclick="this.parentElement.parentElement.remove()" 
+          style="padding:1rem 2rem;background:var(--cyan);color:white;border:none;border-radius:10px;font-weight:600;cursor:pointer;"
+        >
+          Entendido
+        </button>
+      `;
+
+      overlay.appendChild(message);
+      document.body.appendChild(overlay);
+
+      setTimeout(() => {
+        if (overlay.parentElement) overlay.remove();
+      }, 5000);
+    }
+
+    // Add animation styles
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      @keyframes scaleIn {
+        from { transform: scale(0.8); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Initialize
+    loadOrders();
+  </script>
+</body>
+</html>

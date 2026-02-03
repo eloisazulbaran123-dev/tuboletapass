@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Confirmación de Orden</title>
+  <link rel="stylesheet" href="/src/styles.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Inter, sans-serif; background:#f3f4f6; margin:0; }
+    .card {
+      max-width:600px; margin:60px auto; background:white;
+      padding:40px; border-radius:16px; box-shadow:0 10px 40px rgba(0,0,0,.1);
+      text-align:center;
+    }
+    h1 { color:#0f172a; }
+    .order { font-size:20px; color:#0891b2; font-weight:bold; margin:10px 0 20px; }
+    .box { background:#fef3c7; padding:16px; border-radius:10px; margin:20px 0; }
+    .info-box { background:#f8fafc; padding:16px; border-radius:10px; margin:20px 0; text-align:left; }
+    .info-box p { margin:8px 0; color:#475569; font-size:0.95rem; }
+    .btn {
+      display:inline-block; margin-top:20px; padding:12px 20px;
+      border-radius:8px; background:#06b6d4; color:white;
+      text-decoration:none; font-weight:bold;
+    }
+    .qr-section {
+      margin:20px 0; padding:20px; border-radius:12px; background:#f8fafc;
+    }
+    .qr-section h3 { color:#0f172a; margin-bottom:10px; }
+    .qr-section img { width:200px; height:200px; margin:15px auto; display:block; }
+    .bank-info {
+      text-align:left; background:white; border-radius:10px; 
+      padding:1.2rem; border:1px solid #e2e8f0; margin-top:1rem;
+    }
+    .bank-info h4 { margin-bottom:0.75rem; font-size:0.95rem; font-weight:700; }
+    .bank-info p { margin:8px 0; font-size:0.9rem; color:#475569; }
+  </style>
+</head>
+<body>
+  <div class="card" id="content"></div>
+
+  <script>
+    const data = JSON.parse(localStorage.getItem('tuboleta-last-order') || '{}');
+    console.log('📦 Datos de la orden en confirmación:', data);
+    const box = document.getElementById('content');
+
+    if (!data.order) {
+      window.location.href = "/";
+    }
+
+    if (data.status === "completed") {
+      box.innerHTML = `
+        <h1>✅ Pago exitoso</h1>
+        <div class="order">Orden #${data.order}</div>
+        
+        <div class="info-box">
+          <p><strong>Cliente:</strong> ${data.name || 'N/A'}</p>
+          ${data.docType && data.docNumber ? `
+            <p><strong>Documento:</strong> ${data.docType} ${data.docNumber}</p>
+          ` : ''}
+          <p><strong>Total pagado:</strong> $${Math.round(data.amount).toLocaleString('es-CO')}</p>
+        </div>
+        
+        <div class="box">
+          📧 Recibirás un correo de confirmación en <strong>${data.email}</strong> con tus boletas.
+        </div>
+        
+        <a href="/mis-ordenes.html" class="btn">Ver mis órdenes</a>
+      `;
+    } else {
+      const qrConfig = localStorage.getItem('tuboleta-qr-config');
+      let qrHTML = '';
+
+      if (qrConfig) {
+        try {
+          const config = JSON.parse(qrConfig);
+
+          qrHTML = `
+            <div class="qr-section">
+              <h3>Información para el pago</h3>
+
+              ${config.qrImage ? `
+                <h4 style="font-size:1rem;margin-bottom:0.75rem;">Escanea el código QR</h4>
+                <img src="${config.qrImage}" alt="QR de pago">
+                <p style="text-align:center;color:#64748b;font-size:0.9rem;margin:1rem 0;">
+                  O realiza la transferencia manualmente con estos datos:
+                </p>
+              ` : ''}
+
+              <div class="bank-info">
+                <h4>📋 Datos bancarios</h4>
+                ${config.accountName ? `<p><strong>Titular:</strong> ${config.accountName}</p>` : ''}
+                ${config.bankName ? `<p><strong>Banco:</strong> ${config.bankName}</p>` : ''}
+                ${config.accountNumber ? `<p><strong>Cuenta:</strong> ${config.accountNumber}</p>` : ''}
+                ${config.nit ? `<p><strong>NIT:</strong> ${config.nit}</p>` : ''}
+              </div>
+            </div>
+          `;
+        } catch (e) {
+          console.error('Error leyendo configuración QR', e);
+        }
+      }
+
+      box.innerHTML = `
+        <h1>🕐 Orden pendiente</h1>
+        <div class="order">Orden #${data.order || '—'}</div>
+        
+        <div class="info-box">
+          <p><strong>Cliente:</strong> ${data.name || 'N/A'}</p>
+          ${data.docType && data.docNumber ? `
+            <p><strong>Documento:</strong> ${data.docType} ${data.docNumber}</p>
+          ` : ''}
+          <p><strong>Proveedor:</strong> ${data.provider || 'N/A'}</p>
+          <p><strong>Total a pagar:</strong> $${Number(data.amount || 0).toLocaleString('es-CO')}</p>
+        </div>
+        
+        <div class="box">
+          <strong>Referencia de pago:</strong> ${data.ref || '—'}
+        </div>
+        
+        ${qrHTML}
+        
+        <a href="/mis-ordenes.html" class="btn">Ver mis órdenes</a>
+      `;
+    }
+    
+    localStorage.removeItem('tuboleta-last-order');
+  </script>
+</body>
+</html>
