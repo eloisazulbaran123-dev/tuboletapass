@@ -521,6 +521,7 @@
       try {
         console.log('📤 Enviando a Supabase:', {
           user_id: currentUser.id,
+          user_email: currentUser.email,
           event_id: cartItem.eventId,
           amount: total,
           total_amount: total
@@ -528,6 +529,7 @@
 
         const supabaseOrder = await ordersApi.create({
           user_id: currentUser.id,
+          user_email: currentUser.email, // ✅ Agregar user_email
           event_id: cartItem.eventId,
           tickets: { items: [cartItem] },
           amount: total, // ✅ Para compatibilidad con columna 'amount'
@@ -610,6 +612,7 @@
       try {
         console.log('📤 Enviando a Supabase:', {
           user_id: currentUser.id,
+          user_email: currentUser.email,
           event_id: cartItem.eventId,
           amount: total,
           total_amount: total
@@ -617,6 +620,7 @@
 
         const supabaseOrder = await ordersApi.create({
           user_id: currentUser.id,
+          user_email: currentUser.email, // ✅ Agregar user_email
           event_id: cartItem.eventId,
           tickets: { items: [cartItem] },
           amount: total, // ✅ Para compatibilidad con columna 'amount'

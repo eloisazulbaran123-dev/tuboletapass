@@ -723,20 +723,43 @@ for (const ticket of ticketTypes) {
     };
 
     // ===== CONFIGURACIÓN QR CON UPLOAD =====
-    function loadQRConfig() {
+    async function loadQRConfig() {
+  try {
+    const { data, error } = await supabase
+      .from('payment_config')
+      .select('*')
+      .eq('id', 1)
+      .single();
+
+    if (data && !error) {
+      document.getElementById('accountName').value = data.account_name || '';
+      document.getElementById('accountNumber').value = data.account_number || '';
+      document.getElementById('bankName').value = data.bank_name || '';
+      document.getElementById('nit').value = data.nit || '';
+
+      if (data.qr_image) {
+        qrImageBase64 = data.qr_image;
+        document.getElementById('qrPreview').src = data.qr_image;
+        document.getElementById('qrPreviewContainer').style.display = 'block';
+      }
+    } else {
+      // Respaldo localStorage
       const config = JSON.parse(localStorage.getItem('tuboleta-qr-config') || '{}');
-      
       document.getElementById('accountName').value = config.accountName || '';
       document.getElementById('accountNumber').value = config.accountNumber || '';
       document.getElementById('bankName').value = config.bankName || '';
       document.getElementById('nit').value = config.nit || '';
-      
+
       if (config.qrImage) {
         qrImageBase64 = config.qrImage;
         document.getElementById('qrPreview').src = config.qrImage;
         document.getElementById('qrPreviewContainer').style.display = 'block';
       }
     }
+  } catch (error) {
+    console.error('Error cargando configuración QR:', error);
+  }
+}
 
     const qrUploadArea = document.getElementById('qrUploadArea');
     const qrFileInput = document.getElementById('qrFileInput');
@@ -797,20 +820,43 @@ for (const ticket of ticketTypes) {
 
     const qrConfigForm = document.getElementById('qrConfigForm');
     if (qrConfigForm) {
-      qrConfigForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        
-        const config = {
-          accountName: document.getElementById('accountName').value,
-          accountNumber: document.getElementById('accountNumber').value,
-          bankName: document.getElementById('bankName').value,
-          nit: document.getElementById('nit').value,
-          qrImage: qrImageBase64
-        };
-        
-        localStorage.setItem('tuboleta-qr-config', JSON.stringify(config));
-        showToast('Configuración guardada', 'success');
-      });
+      qrConfigForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const config = {
+    accountName: document.getElementById('accountName').value,
+    accountNumber: document.getElementById('accountNumber').value,
+    bankName: document.getElementById('bankName').value,
+    nit: document.getElementById('nit').value,
+    qrImage: qrImageBase64
+  };
+
+  try {
+    // Guardar en localStorage (respaldo)
+    localStorage.setItem('tuboleta-qr-config', JSON.stringify(config));
+
+    // Guardar en Supabase
+    const { error } = await supabase
+      .from('payment_config')
+      .upsert([{
+        id: 1,
+        account_name: config.accountName,
+        account_number: config.accountNumber,
+        bank_name: config.bankName,
+        nit: config.nit,
+        qr_image: config.qrImage,
+        updated_at: new Date().toISOString()
+      }]);
+
+    if (error) throw error;
+
+    showToast('✅ Configuración guardada en Supabase', 'success');
+
+  } catch (error) {
+    console.error('Error guardando configuración:', error);
+    showToast('❌ Error al guardar: ' + error.message, 'error');
+  }
+});
     }
 
     window.removeQR = function() {
