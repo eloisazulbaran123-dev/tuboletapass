@@ -485,6 +485,7 @@
           user_id: currentUser.id,
           event_id: cartItem.eventId,
           tickets: { items: [cartItem] },
+          amount: total, // ✅ Para compatibilidad con columna 'amount'
           total_amount: total, // ✅ NÚMERO FINAL
           payment_details: { // ✅ DETALLES COMPLETOS EN JSON
             subtotal: subtotal,
@@ -543,6 +544,7 @@
           user_id: currentUser.id,
           event_id: cartItem.eventId,
           tickets: { items: [cartItem] },
+          amount: total, // ✅ Para compatibilidad con columna 'amount'
           total_amount: total, // ✅ NÚMERO FINAL
           payment_details: { // ✅ DETALLES COMPLETOS EN JSON
             subtotal: subtotal,
