@@ -354,18 +354,21 @@ try {
   const userEmail = userData?.email || document.getElementById('email').value;
 
   const { error } = await supabase
-    .from('orders')
-    .insert({
-      order_number: orderNumber,
-      payment_ref: referenceNumber,
-      provider: selectedProvider,
-      amount: cartItem.total,
-      status: 'pending',
-      user_email: userEmail,
-      user_name: document.getElementById('name').value,
-      user_phone: document.getElementById('phone').value,
-      payment_met: 'transfer'
-    });
+  .from('orders')
+  .insert({
+    order_number: orderNumber,
+    payment_reference: referenceNumber,
+    payment_method: 'transfer',
+    provider: selectedProvider,
+    total_amount: cartItem.total,
+    status: 'pending',
+    email: userEmail,
+    name: document.getElementById('name').value,
+    phone: document.getElementById('phone').value,
+    event_name: cartItem.eventName,
+    ticket_type: cartItem.ticketType,
+    quantity: cartItem.quantity
+  });
 
   if (error) {
     console.error('❌ Error guardando orden en BD:', error);
