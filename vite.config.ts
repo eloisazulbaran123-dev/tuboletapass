@@ -19,5 +19,8 @@ export default defineConfig({
         admin: resolve(__dirname, 'admin.html')
       }
     }
+  },
+  server: {
+    port: 5173
   }
 })
