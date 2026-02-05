@@ -23,6 +23,7 @@
     .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: var(--text); font-size: 0.9rem; }
     .form-group input, .form-group select { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; font-family: inherit; }
     .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--cyan); }
+    .form-group input:disabled { background: #f5f5f5; cursor: not-allowed; }
     .form-row { display: grid; grid-template-columns: 1fr 2fr; gap: 1rem; }
     .payment-methods { display: grid; gap: 1rem; margin-bottom: 1.5rem; }
     .payment-method { display: flex; align-items: center; gap: 1rem; padding: 1rem; border: 2px solid var(--border); border-radius: 10px; cursor: pointer; transition: all 0.2s; }
@@ -46,7 +47,25 @@
     .btn-primary { width: 100%; padding: 1rem; background: linear-gradient(135deg, var(--yellow) 0%, #e6a800 100%); color: white; font-size: 1rem; font-weight: 700; border-radius: 10px; border: none; cursor: pointer; transition: all 0.2s; }
     .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(230,184,0,0.4); }
     .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-    @media (min-width: 768px) { .checkout-grid { grid-template-columns: 1fr 320px; } .provider-grid { grid-template-columns: repeat(3, 1fr); } }
+    
+    /* Alerta de autenticación */
+    .auth-alert { 
+      background: #fff3cd; 
+      border: 1px solid #ffc107; 
+      color: #856404; 
+      padding: 1rem; 
+      border-radius: 8px; 
+      margin-bottom: 1rem; 
+      display: flex; 
+      align-items: center; 
+      gap: 0.75rem;
+    }
+    .auth-alert svg { min-width: 20px; }
+    
+    @media (min-width: 768px) { 
+      .checkout-grid { grid-template-columns: 1fr 320px; } 
+      .provider-grid { grid-template-columns: repeat(3, 1fr); } 
+    }
   </style>
 </head>
 <body>
@@ -75,22 +94,35 @@
 
             <div class="checkout-card">
               <h2>Información de contacto</h2>
+              
+              <!-- ALERTA SI NO ESTÁ AUTENTICADO -->
+              <div id="authAlert" class="auth-alert hidden">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <div>
+                  <strong>Debes iniciar sesión para completar tu compra.</strong>
+                  <a href="/login.html" style="color: var(--cyan); text-decoration: underline; display: block; margin-top: 0.25rem;">Iniciar sesión aquí</a>
+                </div>
+              </div>
+              
               <div class="form-group">
                 <label>Correo electrónico *</label>
-                <input type="email" id="email" placeholder="tu@email.com" required />
+                <input type="email" id="email" placeholder="tu@email.com" required disabled />
               </div>
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <div class="form-group">
                   <label>Nombre *</label>
-                  <input type="text" id="name" placeholder="Tu nombre" required />
+                  <input type="text" id="name" placeholder="Tu nombre" required disabled />
                 </div>
                 <div class="form-group">
                   <label>Teléfono *</label>
-                  <input type="tel" id="phone" placeholder="+57 300 123 4567" required />
+                  <input type="tel" id="phone" placeholder="+57 300 123 4567" required disabled />
                 </div>
               </div>
               
-              <!-- NUEVO: Campos de documento -->
               <div class="form-row">
                 <div class="form-group">
                   <label>Tipo de documento *</label>
@@ -169,35 +201,33 @@
                     <img src="logos/bancolombia.png" alt="Bancolombia" class="provider-logo" onerror="this.style.display='none'">
                     <span>Bancolombia</span>
                   </div>
-                  <div class="provider-option" data-provider="Davivienda">
-                    <img src="logos/Davivienda.png" alt="Davivienda" class="provider-logo" onerror="this.style.display='none'">
-                    <span>Davivienda</span>
+                  <div class="provider-option" data-provider="PSE">
+                    <img src="logos/pse.png" alt="PSE" class="provider-logo" onerror="this.style.display='none'">
+                    <span>PSE</span>
+                  </div>
+                  <div class="provider-option" data-provider="Banco de Bogotá">
+                    <img src="logos/bancodebogota.png" alt="Banco de Bogotá" class="provider-logo" onerror="this.style.display='none'">
+                    <span>Banco de Bogotá</span>
                   </div>
                   <div class="provider-option" data-provider="BBVA">
                     <img src="logos/bbva.png" alt="BBVA" class="provider-logo" onerror="this.style.display='none'">
                     <span>BBVA</span>
                   </div>
-                  <div class="provider-option" data-provider="Otros">
-                    <span style="font-size:2rem;">🏦</span>
-                    <span>Otros</span>
-                  </div>
                 </div>
               </div>
             </div>
-
-            <button class="btn-primary" id="payBtn">Pagar</button>
           </div>
 
           <div>
             <div class="summary-card">
               <div class="summary-header">
-                <h3 style="font-size:1rem;font-weight:700;color:var(--blue);margin:0;">Resumen</h3>
+                <h3 style="margin: 0; font-size: 1rem; font-weight: 700; color: var(--blue);">Resumen de compra</h3>
               </div>
               <div class="summary-body">
                 <div id="summaryItems"></div>
-                <div class="summary-row"><span>Subtotal</span><span id="subtotal">$0</span></div>
-                <div class="summary-row"><span>Servicio (10%)</span><span id="fee">$0</span></div>
-                <div class="summary-row total"><span>Total</span><span id="total">$0</span></div>
+                <button id="checkoutBtn" class="btn-primary" disabled>
+                  <span id="btnText">Completar compra</span>
+                </button>
               </div>
             </div>
           </div>
@@ -212,158 +242,158 @@
     let cartItem = null;
     let selectedPaymentMethod = 'card';
     let selectedProvider = null;
+    let currentUser = null; // ✅ NUEVA VARIABLE PARA USUARIO AUTENTICADO
 
     async function init() {
-      console.log('🚀 Checkout init');
+      // ✅ PASO 1: VERIFICAR AUTENTICACIÓN
+      await checkAuthentication();
       
-      // Verificar autenticación
-      const session = await auth.getSession();
-      if (!session) {
-        localStorage.setItem('redirect-after-login', window.location.pathname);
-        alert('Debes iniciar sesión para continuar');
-        window.location.href = '/login.html';
-        return;
-      }
+      cartItem = JSON.parse(localStorage.getItem('tuboleta-cart') || 'null');
 
-      const cart = localStorage.getItem('tuboleta-cart');
-      if (!cart) {
-        alert('El carrito está vacío');
+      if (!cartItem) {
+        alert('No hay artículos en el carrito');
         window.location.href = '/';
         return;
       }
 
+      renderOrderItems();
+      renderSummary();
+      setupPaymentMethods();
+      setupProviderSelection();
+      
+      // ✅ SOLO HABILITAR BOTÓN SI ESTÁ AUTENTICADO
+      if (currentUser) {
+        document.getElementById('checkoutBtn').disabled = false;
+      }
+
+      document.getElementById('checkoutBtn').addEventListener('click', handleCheckout);
+    }
+
+    // ✅ NUEVA FUNCIÓN: VERIFICAR AUTENTICACIÓN
+    async function checkAuthentication() {
       try {
-        cartItem = JSON.parse(cart);
-        renderCart();
-        renderSummary();
-        await prefillUserData();
-        setTimeout(() => {
-          setupPaymentMethods();
-          setupProviders();
-          setupPayButton();
-        }, 200);
+        currentUser = await auth.getUser();
+        
+        if (!currentUser) {
+          // Usuario NO autenticado - mostrar alerta
+          document.getElementById('authAlert').classList.remove('hidden');
+          document.getElementById('checkoutBtn').disabled = true;
+          document.getElementById('checkoutBtn').innerHTML = '🔒 Debes iniciar sesión';
+          return;
+        }
+
+        // Usuario autenticado - cargar datos
+        console.log('✅ Usuario autenticado:', currentUser.email);
+        document.getElementById('email').value = currentUser.email;
+        document.getElementById('email').disabled = true;
+        document.getElementById('name').value = currentUser.name || '';
+        document.getElementById('name').disabled = false;
+        document.getElementById('phone').value = currentUser.phone || '';
+        document.getElementById('phone').disabled = false;
+        
       } catch (error) {
-        console.error('❌ Init error:', error);
+        console.error('Error verificando autenticación:', error);
+        document.getElementById('authAlert').classList.remove('hidden');
+        document.getElementById('checkoutBtn').disabled = true;
       }
     }
 
-    async function prefillUserData() {
-      try {
-        const userData = await auth.getUserData();
-        if (userData) {
-          const emailInput = document.getElementById('email');
-          const nameInput = document.getElementById('name');
-          const phoneInput = document.getElementById('phone');
-          
-          if (emailInput && userData.email) {
-            emailInput.value = userData.email;
-            emailInput.readOnly = true;
-          }
-          if (nameInput && userData.name) nameInput.value = userData.name;
-          if (phoneInput && userData.phone) phoneInput.value = userData.phone;
-        }
-      } catch (error) {}
-    }
-
-    function renderCart() {
-      if (!cartItem) return;
+    function renderOrderItems() {
       const container = document.getElementById('orderItems');
-      if (!container) return;
-
       container.innerHTML = `
         <div class="order-item">
-          <img src="${cartItem.eventImage}" alt="${cartItem.eventName}">
-          <div class="order-item-info">
-            <h4>${cartItem.eventName}</h4>
-            <p>${cartItem.eventVenue}</p>
-            <p>${cartItem.eventDate}</p>
-            <p style="color:var(--cyan);font-weight:600;">${cartItem.ticketType}</p>
+          <img src="${cartItem.image}" alt="${cartItem.title}" />
+          <div class="order-item-info" style="flex: 1;">
+            <h4>${cartItem.title}</h4>
+            <p>${cartItem.ticketType} × ${cartItem.quantity}</p>
+            <p style="font-weight: 600; color: var(--cyan); margin-top: 0.25rem;">${formatPrice(cartItem.total)}</p>
           </div>
         </div>
       `;
     }
 
     function renderSummary() {
-      if (!cartItem) return;
-      document.getElementById('subtotal').textContent = formatPrice(cartItem.subtotal || 0);
-      document.getElementById('fee').textContent = formatPrice(cartItem.serviceFee || 0);
-      document.getElementById('total').textContent = formatPrice(cartItem.total || 0);
+      const container = document.getElementById('summaryItems');
+      const fee = Math.round(cartItem.total * 0.05);
+      const total = cartItem.total + fee;
 
-      const summaryItems = document.getElementById('summaryItems');
-      if (summaryItems) {
-        summaryItems.innerHTML = `
-          <div style="margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--border);">
-            <div style="display:flex;justify-content:space-between;">
-              <span style="font-weight:500;">${cartItem.ticketType}</span>
-              <span>x${cartItem.quantity}</span>
-            </div>
-          </div>
-        `;
-      }
+      container.innerHTML = `
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <span>${formatPrice(cartItem.total)}</span>
+        </div>
+        <div class="summary-row">
+          <span>Cargo por servicio</span>
+          <span>${formatPrice(fee)}</span>
+        </div>
+        <div class="summary-row total">
+          <span>Total a pagar</span>
+          <span>${formatPrice(total)}</span>
+        </div>
+      `;
     }
 
     function setupPaymentMethods() {
       const methods = document.querySelectorAll('.payment-method');
-      if (methods.length === 0) {
-        setTimeout(setupPaymentMethods, 300);
-        return;
-      }
+      const cardForm = document.getElementById('cardForm');
+      const transferForm = document.getElementById('transferForm');
 
       methods.forEach(method => {
-        method.addEventListener('click', function(e) {
-          e.preventDefault();
-          document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
-          this.classList.add('selected');
-          selectedPaymentMethod = this.dataset.method;
-
-          const cardForm = document.getElementById('cardForm');
-          const transferForm = document.getElementById('transferForm');
+        method.addEventListener('click', () => {
+          methods.forEach(m => m.classList.remove('selected'));
+          method.classList.add('selected');
+          selectedPaymentMethod = method.dataset.method;
 
           if (selectedPaymentMethod === 'card') {
-            if (cardForm) { cardForm.style.display = 'block'; cardForm.classList.remove('hidden'); }
-            if (transferForm) { transferForm.style.display = 'none'; transferForm.classList.add('hidden'); }
+            cardForm.classList.remove('hidden');
+            transferForm.classList.add('hidden');
           } else {
-            if (cardForm) { cardForm.style.display = 'none'; cardForm.classList.add('hidden'); }
-            if (transferForm) { transferForm.style.display = 'block'; transferForm.classList.remove('hidden'); }
+            cardForm.classList.add('hidden');
+            transferForm.classList.remove('hidden');
           }
-        }, true);
-      });
-    }
-
-    function setupProviders() {
-      const providers = document.querySelectorAll('.provider-option');
-      providers.forEach(provider => {
-        provider.addEventListener('click', function() {
-          document.querySelectorAll('.provider-option').forEach(p => p.classList.remove('selected'));
-          this.classList.add('selected');
-          selectedProvider = this.dataset.provider;
         });
       });
     }
 
-    function setupPayButton() {
-      const payBtn = document.getElementById('payBtn');
-      if (!payBtn) return;
-
-      payBtn.addEventListener('click', async () => {
-        if (!validateForm()) return;
-        
-        payBtn.disabled = true;
-        payBtn.textContent = 'Procesando...';
-
-        try {
-          if (selectedPaymentMethod === 'card') {
-            await processCardPayment();
-          } else {
-            await processTransferPayment();
-          }
-        } catch (error) {
-          console.error('Error:', error);
-          alert('Error al procesar el pago');
-          payBtn.disabled = false;
-          payBtn.textContent = 'Pagar';
-        }
+    function setupProviderSelection() {
+      const providers = document.querySelectorAll('.provider-option');
+      providers.forEach(provider => {
+        provider.addEventListener('click', () => {
+          providers.forEach(p => p.classList.remove('selected'));
+          provider.classList.add('selected');
+          selectedProvider = provider.dataset.provider;
+        });
       });
+    }
+
+    async function handleCheckout() {
+      // ✅ VALIDACIÓN ADICIONAL DE AUTENTICACIÓN
+      if (!currentUser) {
+        alert('❌ Debes iniciar sesión para completar tu compra');
+        window.location.href = '/login.html';
+        return;
+      }
+
+      if (!validateForm()) return;
+
+      const btn = document.getElementById('checkoutBtn');
+      const btnText = document.getElementById('btnText');
+      
+      btn.disabled = true;
+      btnText.textContent = 'Procesando...';
+
+      try {
+        if (selectedPaymentMethod === 'card') {
+          await processCardPayment();
+        } else {
+          await processTransferPayment();
+        }
+      } catch (error) {
+        console.error('Error procesando pago:', error);
+        alert('Hubo un error procesando tu pago. Por favor intenta nuevamente.');
+        btn.disabled = false;
+        btnText.textContent = 'Completar compra';
+      }
     }
 
     function validateForm() {
@@ -410,13 +440,10 @@
 
     async function processCardPayment() {
       const orderNumber = 'TB-' + Date.now() + Math.floor(Math.random() * 1000);
-      
-      let userData = await auth.getUserData();
-      let userEmail = userData?.email || document.getElementById('email').value;
 
       const orderData = {
         order: orderNumber,
-        email: userEmail,
+        email: currentUser.email, // ✅ USAR currentUser
         name: document.getElementById('name').value,
         phone: document.getElementById('phone').value,
         docType: document.getElementById('docType').value,
@@ -429,15 +456,15 @@
         cardLastFour: document.getElementById('cardNumber').value.slice(-4)
       };
 
-      // Guardar en localStorage
+      // Guardar en localStorage (para compatibilidad)
       const payments = JSON.parse(localStorage.getItem('tuboleta-card-payments') || '[]');
       payments.push(orderData);
       localStorage.setItem('tuboleta-card-payments', JSON.stringify(payments));
 
-      // Guardar en Supabase
+      // ✅ GUARDAR EN SUPABASE CON VALIDACIÓN
       try {
-        await ordersApi.create({
-          user_id: userData.id,
+        const supabaseOrder = await ordersApi.create({
+          user_id: currentUser.id, // ✅ GARANTIZADO QUE EXISTE
           event_id: cartItem.eventId,
           tickets: { items: [cartItem] },
           total_amount: cartItem.total,
@@ -445,9 +472,11 @@
           payment_method: 'card',
           payment_reference: orderNumber
         });
-        console.log('✅ Orden guardada en Supabase');
+        
+        console.log('✅ Orden guardada en Supabase:', supabaseOrder);
       } catch (error) {
-        console.error('Error guardando en Supabase:', error);
+        console.error('❌ Error guardando en Supabase:', error);
+        throw error; // ✅ PROPAGAR ERROR PARA QUE SE MANEJE EN handleCheckout
       }
 
       localStorage.removeItem('tuboleta-cart');
@@ -459,12 +488,9 @@
       const orderNumber = 'TB-' + Date.now() + Math.floor(Math.random() * 1000);
       const referenceNumber = Math.floor(100000000 + Math.random() * 900000000).toString();
 
-      let userData = await auth.getUserData();
-      let userEmail = userData?.email || document.getElementById('email').value;
-
       const orderData = {
         order: orderNumber,
-        email: userEmail,
+        email: currentUser.email, // ✅ USAR currentUser
         name: document.getElementById('name').value,
         phone: document.getElementById('phone').value,
         docType: document.getElementById('docType').value,
@@ -482,10 +508,10 @@
       payments.push(orderData);
       localStorage.setItem('tuboleta-pending', JSON.stringify(payments));
 
-      // Guardar en Supabase
+      // ✅ GUARDAR EN SUPABASE CON VALIDACIÓN
       try {
-        await ordersApi.create({
-          user_id: userData.id,
+        const supabaseOrder = await ordersApi.create({
+          user_id: currentUser.id, // ✅ GARANTIZADO QUE EXISTE
           event_id: cartItem.eventId,
           tickets: { items: [cartItem] },
           total_amount: cartItem.total,
@@ -493,9 +519,11 @@
           payment_method: 'transfer',
           payment_reference: referenceNumber
         });
-        console.log('✅ Orden guardada en Supabase');
+        
+        console.log('✅ Orden guardada en Supabase:', supabaseOrder);
       } catch (error) {
-        console.error('Error guardando en Supabase:', error);
+        console.error('❌ Error guardando en Supabase:', error);
+        throw error; // ✅ PROPAGAR ERROR
       }
 
       localStorage.removeItem('tuboleta-cart');
