@@ -545,6 +545,7 @@
         const supabaseData = {
           user_id: currentUser.id,
           user_email: currentUser.email,
+          user_name: document.getElementById('name').value, // ✅ Agregar user_name
           event_id: parseInt(cartItem.eventId, 10),
           tickets: { items: [cartItem] },
           amount: totalInt,
@@ -673,15 +674,16 @@
 
         const supabaseOrder = await ordersApi.create({
           user_id: currentUser.id,
-          user_email: currentUser.email, // ✅ Agregar user_email
-          event_id: cartItem.eventId,
+          user_email: currentUser.email,
+          user_name: document.getElementById('name').value, // ✅ Agregar user_name
+          event_id: parseInt(cartItem.eventId, 10),
           tickets: { items: [cartItem] },
-          amount: totalInt, // ✅ ENTERO
-          total_amount: totalInt, // ✅ ENTERO
-          payment_details: { // ✅ DETALLES COMPLETOS EN JSON
-            subtotal: subtotalInt,
-            serviceFee: serviceFeeInt,
-            total: totalInt,
+          amount: parseInt(totalInt, 10),
+          total_amount: parseInt(totalInt, 10),
+          payment_details: {
+            subtotal: parseInt(subtotalInt, 10),
+            serviceFee: parseInt(serviceFeeInt, 10),
+            total: parseInt(totalInt, 10),
             items: [cartItem],
             provider: selectedProvider
           },
