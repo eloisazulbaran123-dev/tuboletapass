@@ -2,128 +2,538 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Confirmación de Orden</title>
+  <title>Confirmación de Orden - TuBoleta</title>
   <link rel="stylesheet" href="/src/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: Inter, sans-serif; background:#f3f4f6; margin:0; }
-    .card {
-      max-width:600px; margin:60px auto; background:white;
-      padding:40px; border-radius:16px; box-shadow:0 10px 40px rgba(0,0,0,.1);
-      text-align:center;
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body { 
+      font-family: 'Inter', sans-serif; 
+      background: #f5f5f5;
+      min-height: 100vh;
+      padding: 20px;
     }
-    h1 { color:#0f172a; }
-    .order { font-size:20px; color:#0891b2; font-weight:bold; margin:10px 0 20px; }
-    .box { background:#fef3c7; padding:16px; border-radius:10px; margin:20px 0; }
-    .info-box { background:#f8fafc; padding:16px; border-radius:10px; margin:20px 0; text-align:left; }
-    .info-box p { margin:8px 0; color:#475569; font-size:0.95rem; }
-    .btn {
-      display:inline-block; margin-top:20px; padding:12px 20px;
-      border-radius:8px; background:#06b6d4; color:white;
-      text-decoration:none; font-weight:bold;
+    
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
     }
+    
+    .confirmation-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    
+    /* Header de éxito/pendiente */
+    .status-header {
+      padding: 2rem;
+      text-align: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .status-header.pending {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+    
+    .status-icon {
+      font-size: 3rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .status-title {
+      font-size: 1.75rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+    }
+    
+    .order-number {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      font-weight: 500;
+    }
+    
+    /* Contenido de la tarjeta */
+    .card-content {
+      padding: 1.5rem;
+    }
+    
+    .info-section {
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .info-row:last-child {
+      border-bottom: none;
+    }
+    
+    .info-label {
+      color: #64748b;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    
+    .info-value {
+      color: #0f172a;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-align: right;
+    }
+    
+    .info-value.total {
+      color: #0891b2;
+      font-size: 1.25rem;
+    }
+    
+    /* Sección de QR */
     .qr-section {
-      margin:20px 0; padding:20px; border-radius:12px; background:#f8fafc;
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
     }
-    .qr-section h3 { color:#0f172a; margin-bottom:10px; }
-    .qr-section img { width:200px; height:200px; margin:15px auto; display:block; }
-    .bank-info {
-      text-align:left; background:white; border-radius:10px; 
-      padding:1.2rem; border:1px solid #e2e8f0; margin-top:1rem;
+    
+    .qr-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 1rem;
     }
-    .bank-info h4 { margin-bottom:0.75rem; font-size:0.95rem; font-weight:700; }
-    .bank-info p { margin:8px 0; font-size:0.9rem; color:#475569; }
+    
+    .qr-subtitle {
+      color: #64748b;
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+    
+    .provider-info {
+      background: #f1f5f9;
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .provider-name {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 0.5rem;
+    }
+    
+    .provider-instruction {
+      color: #475569;
+      font-size: 0.9rem;
+    }
+    
+    .provider-instruction strong {
+      color: #0891b2;
+    }
+    
+    .qr-container {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      border: 2px solid #e2e8f0;
+      margin: 1.5rem 0;
+      display: inline-block;
+    }
+    
+    .qr-image {
+      width: 280px;
+      height: 280px;
+      display: block;
+    }
+    
+    .download-btn {
+      display: inline-block;
+      background: #0891b2;
+      color: white;
+      padding: 1rem 2rem;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1rem;
+      transition: all 0.3s;
+      margin: 1rem 0;
+      cursor: pointer;
+      border: none;
+    }
+    
+    .download-btn:hover {
+      background: #0e7490;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(8, 145, 178, 0.3);
+    }
+    
+    .download-btn svg {
+      vertical-align: middle;
+      margin-right: 0.5rem;
+    }
+    
+    /* Datos bancarios alternativos */
+    .bank-details {
+      background: #fefce8;
+      border: 1px solid #fde047;
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin-top: 1.5rem;
+      text-align: left;
+    }
+    
+    .bank-details h4 {
+      color: #854d0e;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .bank-detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      font-size: 0.9rem;
+    }
+    
+    .bank-detail-label {
+      color: #92400e;
+      font-weight: 600;
+    }
+    
+    .bank-detail-value {
+      color: #713f12;
+      font-weight: 500;
+    }
+    
+    /* Email de confirmación */
+    .email-notice {
+      background: #dbeafe;
+      border-left: 4px solid #0891b2;
+      padding: 1.25rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+    }
+    
+    .email-notice p {
+      color: #075985;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    
+    .email-notice strong {
+      color: #0c4a6e;
+    }
+    
+    /* Botones de acción */
+    .actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    
+    .btn {
+      flex: 1;
+      padding: 1rem;
+      border-radius: 10px;
+      text-align: center;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.95rem;
+      transition: all 0.3s;
+      cursor: pointer;
+      border: none;
+    }
+    
+    .btn-primary {
+      background: #0891b2;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #0e7490;
+      transform: translateY(-2px);
+    }
+    
+    .btn-secondary {
+      background: #f1f5f9;
+      color: #475569;
+    }
+    
+    .btn-secondary:hover {
+      background: #e2e8f0;
+    }
+    
+    /* Loading */
+    .loading {
+      text-align: center;
+      padding: 3rem;
+      color: #64748b;
+    }
+    
+    .spinner {
+      border: 3px solid #f1f5f9;
+      border-top: 3px solid #0891b2;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Responsive */
+    @media (max-width: 640px) {
+      .actions {
+        flex-direction: column;
+      }
+      
+      .qr-image {
+        width: 240px;
+        height: 240px;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="card" id="content"></div>
+  <div class="container">
+    <div id="content" class="loading">
+      <div class="spinner"></div>
+      <p>Cargando confirmación...</p>
+    </div>
+  </div>
 
-  <script>
-    const data = JSON.parse(localStorage.getItem('tuboleta-last-order') || '{}');
-    console.log('📦 Datos de la orden en confirmación:', data);
-    const box = document.getElementById('content');
+  <script type="module">
+    import { supabase } from '/src/supabase.ts';
 
-    if (!data.order) {
-      window.location.href = "/";
+    // Obtener datos de la orden
+    const orderData = JSON.parse(localStorage.getItem('tuboleta-last-order') || '{}');
+    console.log('📦 Datos de la orden:', orderData);
+
+    if (!orderData.order) {
+      window.location.href = '/';
     }
 
-    if (data.status === "completed") {
-      box.innerHTML = `
-        <h1>✅ Pago exitoso</h1>
-        <div class="order">Orden #${data.order}</div>
-        
-        <div class="info-box">
-          <p><strong>Cliente:</strong> ${data.name || 'N/A'}</p>
-          ${data.docType && data.docNumber ? `
-            <p><strong>Documento:</strong> ${data.docType} ${data.docNumber}</p>
-          ` : ''}
-          <p><strong>Total pagado:</strong> $${Math.round(data.amount).toLocaleString('es-CO')}</p>
-        </div>
-        
-        <div class="box">
-          📧 Recibirás un correo de confirmación en <strong>${data.email}</strong> con tus boletas.
-        </div>
-        
-        <a href="/mis-ordenes.html" class="btn">Ver mis órdenes</a>
-      `;
-    } else {
-      const qrConfig = localStorage.getItem('tuboleta-qr-config');
-      let qrHTML = '';
+    // Función para descargar el QR
+    window.downloadQR = function(qrImage, provider) {
+      const link = document.createElement('a');
+      link.href = qrImage;
+      link.download = `QR-${provider}-TuBoleta.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    };
 
-      if (qrConfig) {
-        try {
-          const config = JSON.parse(qrConfig);
+    // Cargar configuración de pago desde Supabase
+    async function loadPaymentConfig() {
+      try {
+        const { data, error } = await supabase
+          .from('payment_config')
+          .select('*')
+          .eq('id', 1)
+          .single();
 
-          qrHTML = `
-            <div class="qr-section">
-              <h3>Información para el pago</h3>
+        if (error) {
+          console.log('⚠️ No se encontró configuración en Supabase, usando localStorage');
+          return null;
+        }
 
-              ${config.qrImage ? `
-                <h4 style="font-size:1rem;margin-bottom:0.75rem;">Escanea el código QR</h4>
-                <img src="${config.qrImage}" alt="QR de pago">
-                <p style="text-align:center;color:#64748b;font-size:0.9rem;margin:1rem 0;">
-                  O realiza la transferencia manualmente con estos datos:
-                </p>
-              ` : ''}
+        return {
+          accountName: data.account_name,
+          accountNumber: data.account_number,
+          bankName: data.bank_name,
+          nit: data.nit,
+          qrImage: data.qr_image
+        };
+      } catch (error) {
+        console.error('Error cargando configuración:', error);
+        return null;
+      }
+    }
 
-              <div class="bank-info">
-                <h4>📋 Datos bancarios</h4>
-                ${config.accountName ? `<p><strong>Titular:</strong> ${config.accountName}</p>` : ''}
-                ${config.bankName ? `<p><strong>Banco:</strong> ${config.bankName}</p>` : ''}
-                ${config.accountNumber ? `<p><strong>Cuenta:</strong> ${config.accountNumber}</p>` : ''}
-                ${config.nit ? `<p><strong>NIT:</strong> ${config.nit}</p>` : ''}
+    // Renderizar página
+    async function renderConfirmation() {
+      const content = document.getElementById('content');
+      
+      // Determinar el proveedor seleccionado
+      const provider = orderData.provider || 'Nequi';
+      
+      if (orderData.status === 'completed') {
+        // PAGO COMPLETADO (Tarjeta)
+        content.innerHTML = `
+          <div class="confirmation-card">
+            <div class="status-header">
+              <div class="status-icon">✅</div>
+              <h1 class="status-title">¡Pago Exitoso!</h1>
+              <p class="order-number">Orden #${orderData.order}</p>
+            </div>
+            
+            <div class="card-content">
+              <div class="info-section">
+                <div class="info-row">
+                  <span class="info-label">Cliente</span>
+                  <span class="info-value">${orderData.name || 'N/A'}</span>
+                </div>
+                ${orderData.docType && orderData.docNumber ? `
+                  <div class="info-row">
+                    <span class="info-label">Documento</span>
+                    <span class="info-value">${orderData.docType} ${orderData.docNumber}</span>
+                  </div>
+                ` : ''}
+                <div class="info-row">
+                  <span class="info-label">Total Pagado</span>
+                  <span class="info-value total">$${Math.round(orderData.amount || 0).toLocaleString('es-CO')}</span>
+                </div>
+              </div>
+              
+              <div class="email-notice">
+                <p>📧 Recibirás un correo de confirmación en <strong>${orderData.email}</strong> con tus boletas.</p>
+              </div>
+              
+              <div class="actions">
+                <a href="/mis-ordenes.html" class="btn btn-primary">Ver mis órdenes</a>
+                <a href="/" class="btn btn-secondary">Volver al inicio</a>
               </div>
             </div>
-          `;
-        } catch (e) {
-          console.error('Error leyendo configuración QR', e);
+          </div>
+        `;
+      } else {
+        // PAGO PENDIENTE (Transferencia/QR)
+        // Cargar configuración desde Supabase
+        let config = await loadPaymentConfig();
+        
+        // Fallback a localStorage si no hay en Supabase
+        if (!config) {
+          const localConfig = localStorage.getItem('tuboleta-qr-config');
+          if (localConfig) {
+            config = JSON.parse(localConfig);
+          }
         }
-      }
 
-      box.innerHTML = `
-        <h1>🕐 Orden pendiente</h1>
-        <div class="order">Orden #${data.order || '—'}</div>
+        let qrSection = '';
         
-        <div class="info-box">
-          <p><strong>Cliente:</strong> ${data.name || 'N/A'}</p>
-          ${data.docType && data.docNumber ? `
-            <p><strong>Documento:</strong> ${data.docType} ${data.docNumber}</p>
-          ` : ''}
-          <p><strong>Proveedor:</strong> ${data.provider || 'N/A'}</p>
-          <p><strong>Total a pagar:</strong> $${Number(data.amount || 0).toLocaleString('es-CO')}</p>
-        </div>
-        
-        <div class="box">
-          <strong>Referencia de pago:</strong> ${data.ref || '—'}
-        </div>
-        
-        ${qrHTML}
-        
-        <a href="/mis-ordenes.html" class="btn">Ver mis órdenes</a>
-      `;
+        if (config && config.qrImage) {
+          qrSection = `
+            <div class="qr-section">
+              <h2 class="qr-title">QR ${provider.toUpperCase()} generado!</h2>
+              <p class="qr-subtitle">
+                Una copia de tu código QR fue enviada a <strong>${orderData.email}</strong>, 
+                sin embargo, ya puedes pagar tu compra con los siguientes datos:
+              </p>
+              
+              <div class="info-section">
+                <div class="info-row">
+                  <span class="info-label">Valor a pagar</span>
+                  <span class="info-value total">$${Math.round(orderData.amount || 0).toLocaleString('es-CO')}</span>
+                </div>
+                ${orderData.ref ? `
+                  <div class="info-row">
+                    <span class="info-label">Referencia de pago</span>
+                    <span class="info-value">${orderData.ref}</span>
+                  </div>
+                ` : ''}
+              </div>
+              
+              <div class="provider-info">
+                <p class="provider-name">Paga con ${provider}</p>
+                <p class="provider-instruction">
+                  Abrí <strong>${provider}</strong> en tu teléfono móvil y usa el siguiente código QR para pagar:
+                </p>
+              </div>
+              
+              <div class="qr-container">
+                <img src="${config.qrImage}" alt="Código QR de pago" class="qr-image" id="qrImage">
+              </div>
+              
+              <button onclick="downloadQR('${config.qrImage}', '${provider}')" class="download-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+                </svg>
+                DESCARGAR CÓDIGO QR
+              </button>
+              
+              ${config.accountName || config.bankName || config.accountNumber ? `
+                <div class="bank-details">
+                  <h4>
+                    📋 Datos bancarios (alternativa manual)
+                  </h4>
+                  ${config.accountName ? `
+                    <div class="bank-detail-row">
+                      <span class="bank-detail-label">Titular:</span>
+                      <span class="bank-detail-value">${config.accountName}</span>
+                    </div>
+                  ` : ''}
+                  ${config.bankName ? `
+                    <div class="bank-detail-row">
+                      <span class="bank-detail-label">Banco:</span>
+                      <span class="bank-detail-value">${config.bankName}</span>
+                    </div>
+                  ` : ''}
+                  ${config.accountNumber ? `
+                    <div class="bank-detail-row">
+                      <span class="bank-detail-label">Cuenta:</span>
+                      <span class="bank-detail-value">${config.accountNumber}</span>
+                    </div>
+                  ` : ''}
+                  ${config.nit ? `
+                    <div class="bank-detail-row">
+                      <span class="bank-detail-label">NIT:</span>
+                      <span class="bank-detail-value">${config.nit}</span>
+                    </div>
+                  ` : ''}
+                </div>
+              ` : ''}
+            </div>
+          `;
+        }
+
+        content.innerHTML = `
+          <div class="confirmation-card">
+            <div class="status-header pending">
+              <div class="status-icon">⏳</div>
+              <h1 class="status-title">Orden Pendiente</h1>
+              <p class="order-number">Orden #${orderData.order}</p>
+            </div>
+            
+            <div class="card-content">
+              ${qrSection}
+              
+              <div class="actions">
+                <a href="/mis-ordenes.html" class="btn btn-primary">Ver mis órdenes</a>
+                <a href="/" class="btn btn-secondary">Volver al inicio</a>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      
+      // Limpiar localStorage después de mostrar
+      localStorage.removeItem('tuboleta-last-order');
     }
-    
-    localStorage.removeItem('tuboleta-last-order');
+
+    // Iniciar
+    renderConfirmation();
   </script>
 </body>
 </html>
