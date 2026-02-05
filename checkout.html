@@ -469,6 +469,8 @@
     async function processCardPayment() {
       const orderNumber = 'TB-' + Date.now() + Math.floor(Math.random() * 1000);
 
+      console.log('🔍 DEBUG - cartItem completo:', cartItem);
+
       // ✅ Calcular totales de forma más robusta
       let subtotal = 0;
       let serviceFee = 0;
@@ -479,16 +481,19 @@
         subtotal = cartItem.subtotal;
         serviceFee = cartItem.serviceFee;
         total = cartItem.total;
+        console.log('📊 Usando totales del cartItem');
       } else if (cartItem.total) {
         // Solo tiene total, calcular fee del 10%
         subtotal = Math.round(cartItem.total / 1.1); // Descontar el 10%
         serviceFee = cartItem.total - subtotal;
         total = cartItem.total;
+        console.log('📊 Calculando desde total');
       } else if (cartItem.price && cartItem.quantity) {
         // Calcular desde precio unitario
         subtotal = cartItem.price * cartItem.quantity;
         serviceFee = Math.round(subtotal * 0.1);
         total = subtotal + serviceFee;
+        console.log('📊 Calculando desde precio y cantidad');
       } else {
         console.error('❌ No se pudo calcular el total del carrito:', cartItem);
         alert('Error: No se pudo calcular el total de la orden');
@@ -501,6 +506,13 @@
       const subtotalInt = Math.round(subtotal);
       const serviceFeeInt = Math.round(serviceFee);
       const totalInt = Math.round(total);
+
+      console.log('💰 Totales redondeados:', { subtotalInt, serviceFeeInt, totalInt });
+      console.log('🔍 Tipo de datos:', {
+        subtotalInt: typeof subtotalInt,
+        serviceFeeInt: typeof serviceFeeInt,
+        totalInt: typeof totalInt
+      });
 
       const orderData = {
         order: orderNumber,
@@ -521,30 +533,23 @@
       const payments = JSON.parse(localStorage.getItem('tuboleta-card-payments') || '[]');
       payments.push(orderData);
       localStorage.setItem('tuboleta-card-payments', JSON.stringify(payments));
+      console.log('✅ Guardado en localStorage');
 
       // ✅ GUARDAR EN SUPABASE con total_amount numérico y payment_details
       try {
-        // ✅ REDONDEAR TODOS LOS VALORES A ENTEROS
-        const subtotalInt = Math.round(subtotal);
-        const serviceFeeInt = Math.round(serviceFee);
-        const totalInt = Math.round(total);
+        // ✅ FORZAR CONVERSIÓN A ENTERO CON parseInt
+        const subtotalInt = parseInt(Math.round(subtotal), 10);
+        const serviceFeeInt = parseInt(Math.round(serviceFee), 10);
+        const totalInt = parseInt(Math.round(total), 10);
 
-        console.log('📤 Enviando a Supabase:', {
+        const supabaseData = {
           user_id: currentUser.id,
           user_email: currentUser.email,
-          event_id: cartItem.eventId,
-          amount: totalInt,
-          total_amount: totalInt
-        });
-
-        const supabaseOrder = await ordersApi.create({
-          user_id: currentUser.id,
-          user_email: currentUser.email, // ✅ Agregar user_email
-          event_id: cartItem.eventId,
+          event_id: parseInt(cartItem.eventId, 10),
           tickets: { items: [cartItem] },
-          amount: totalInt, // ✅ ENTERO
-          total_amount: totalInt, // ✅ ENTERO
-          payment_details: { // ✅ DETALLES COMPLETOS EN JSON
+          amount: totalInt,
+          total_amount: totalInt,
+          payment_details: {
             subtotal: subtotalInt,
             serviceFee: serviceFeeInt,
             total: totalInt,
@@ -553,11 +558,39 @@
           status: 'completed',
           payment_method: 'card',
           payment_reference: orderNumber
+        };
+
+        console.log('📤 Datos que se enviarán a Supabase:', supabaseData);
+        console.log('📤 Verificación de tipos:', {
+          amount_type: typeof supabaseData.amount,
+          amount_value: supabaseData.amount,
+          total_amount_type: typeof supabaseData.total_amount,
+          total_amount_value: supabaseData.total_amount,
+          event_id_type: typeof supabaseData.event_id,
+          event_id_value: supabaseData.event_id
         });
+
+        const supabaseOrder = await ordersApi.create(supabaseData);
         
         console.log('✅ Orden guardada en Supabase:', supabaseOrder);
+        alert('✅ Orden guardada exitosamente!');
       } catch (error) {
-        console.error('❌ Error guardando en Supabase:', error);
+        console.error('❌ Error completo:', error);
+        console.error('❌ Error message:', error.message);
+        console.error('❌ Error stack:', error.stack);
+        
+        // Mostrar más detalles del error de Supabase
+        if (error.details) {
+          console.error('❌ Error details:', error.details);
+        }
+        if (error.hint) {
+          console.error('❌ Error hint:', error.hint);
+        }
+        if (error.code) {
+          console.error('❌ Error code:', error.code);
+        }
+        
+        alert('❌ Error al guardar: ' + error.message);
         throw error;
       }
 
