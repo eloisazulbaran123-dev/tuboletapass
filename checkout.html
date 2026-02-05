@@ -320,15 +320,30 @@
       const container = document.getElementById('summaryItems');
       if (!container || !cartItem) return;
       
-      const subtotal = cartItem.subtotal || cartItem.total || 0;
-      const fee = cartItem.serviceFee || Math.round(subtotal * 0.1);
-      const total = subtotal + fee;
+      // ✅ Calcular totales de forma más robusta (igual que en las funciones de pago)
+      let subtotal = 0;
+      let fee = 0;
+      let total = 0;
+
+      if (cartItem.subtotal && cartItem.serviceFee && cartItem.total) {
+        subtotal = cartItem.subtotal;
+        fee = cartItem.serviceFee;
+        total = cartItem.total;
+      } else if (cartItem.total) {
+        subtotal = Math.round(cartItem.total / 1.1);
+        fee = cartItem.total - subtotal;
+        total = cartItem.total;
+      } else if (cartItem.price && cartItem.quantity) {
+        subtotal = cartItem.price * cartItem.quantity;
+        fee = Math.round(subtotal * 0.1);
+        total = subtotal + fee;
+      }
 
       container.innerHTML = `
         <div style="margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--border);">
           <div style="display:flex;justify-content:space-between;">
-            <span style="font-weight:500;">${cartItem.ticketType}</span>
-            <span>x${cartItem.quantity}</span>
+            <span style="font-weight:500;">${cartItem.ticketType || 'Entrada'}</span>
+            <span>x${cartItem.quantity || 1}</span>
           </div>
         </div>
         <div class="summary-row">
@@ -454,10 +469,33 @@
     async function processCardPayment() {
       const orderNumber = 'TB-' + Date.now() + Math.floor(Math.random() * 1000);
 
-      // Calcular totales
-      const subtotal = cartItem.subtotal || cartItem.total || 0;
-      const serviceFee = cartItem.serviceFee || Math.round(subtotal * 0.1);
-      const total = subtotal + serviceFee;
+      // ✅ Calcular totales de forma más robusta
+      let subtotal = 0;
+      let serviceFee = 0;
+      let total = 0;
+
+      if (cartItem.subtotal && cartItem.serviceFee && cartItem.total) {
+        // Ya tiene todo calculado
+        subtotal = cartItem.subtotal;
+        serviceFee = cartItem.serviceFee;
+        total = cartItem.total;
+      } else if (cartItem.total) {
+        // Solo tiene total, calcular fee del 10%
+        subtotal = Math.round(cartItem.total / 1.1); // Descontar el 10%
+        serviceFee = cartItem.total - subtotal;
+        total = cartItem.total;
+      } else if (cartItem.price && cartItem.quantity) {
+        // Calcular desde precio unitario
+        subtotal = cartItem.price * cartItem.quantity;
+        serviceFee = Math.round(subtotal * 0.1);
+        total = subtotal + serviceFee;
+      } else {
+        console.error('❌ No se pudo calcular el total del carrito:', cartItem);
+        alert('Error: No se pudo calcular el total de la orden');
+        return;
+      }
+
+      console.log('💰 Totales calculados:', { subtotal, serviceFee, total });
 
       const orderData = {
         order: orderNumber,
@@ -481,6 +519,13 @@
 
       // ✅ GUARDAR EN SUPABASE con total_amount numérico y payment_details
       try {
+        console.log('📤 Enviando a Supabase:', {
+          user_id: currentUser.id,
+          event_id: cartItem.eventId,
+          amount: total,
+          total_amount: total
+        });
+
         const supabaseOrder = await ordersApi.create({
           user_id: currentUser.id,
           event_id: cartItem.eventId,
@@ -513,10 +558,33 @@
       const orderNumber = 'TB-' + Date.now() + Math.floor(Math.random() * 1000);
       const referenceNumber = Math.floor(100000000 + Math.random() * 900000000).toString();
 
-      // Calcular totales
-      const subtotal = cartItem.subtotal || cartItem.total || 0;
-      const serviceFee = cartItem.serviceFee || Math.round(subtotal * 0.1);
-      const total = subtotal + serviceFee;
+      // ✅ Calcular totales de forma más robusta
+      let subtotal = 0;
+      let serviceFee = 0;
+      let total = 0;
+
+      if (cartItem.subtotal && cartItem.serviceFee && cartItem.total) {
+        // Ya tiene todo calculado
+        subtotal = cartItem.subtotal;
+        serviceFee = cartItem.serviceFee;
+        total = cartItem.total;
+      } else if (cartItem.total) {
+        // Solo tiene total, calcular fee del 10%
+        subtotal = Math.round(cartItem.total / 1.1);
+        serviceFee = cartItem.total - subtotal;
+        total = cartItem.total;
+      } else if (cartItem.price && cartItem.quantity) {
+        // Calcular desde precio unitario
+        subtotal = cartItem.price * cartItem.quantity;
+        serviceFee = Math.round(subtotal * 0.1);
+        total = subtotal + serviceFee;
+      } else {
+        console.error('❌ No se pudo calcular el total del carrito:', cartItem);
+        alert('Error: No se pudo calcular el total de la orden');
+        return;
+      }
+
+      console.log('💰 Totales calculados:', { subtotal, serviceFee, total });
 
       const orderData = {
         order: orderNumber,
@@ -540,6 +608,13 @@
 
       // ✅ GUARDAR EN SUPABASE con total_amount numérico y payment_details
       try {
+        console.log('📤 Enviando a Supabase:', {
+          user_id: currentUser.id,
+          event_id: cartItem.eventId,
+          amount: total,
+          total_amount: total
+        });
+
         const supabaseOrder = await ordersApi.create({
           user_id: currentUser.id,
           event_id: cartItem.eventId,
