@@ -497,6 +497,11 @@
 
       console.log('💰 Totales calculados:', { subtotal, serviceFee, total });
 
+      // ✅ REDONDEAR PARA EVITAR DECIMALES
+      const subtotalInt = Math.round(subtotal);
+      const serviceFeeInt = Math.round(serviceFee);
+      const totalInt = Math.round(total);
+
       const orderData = {
         order: orderNumber,
         email: currentUser.email,
@@ -504,7 +509,7 @@
         phone: document.getElementById('phone').value,
         docType: document.getElementById('docType').value,
         docNumber: document.getElementById('docNumber').value,
-        amount: total,
+        amount: totalInt,
         items: [cartItem],
         status: 'completed',
         date: new Date().toISOString(),
@@ -519,12 +524,17 @@
 
       // ✅ GUARDAR EN SUPABASE con total_amount numérico y payment_details
       try {
+        // ✅ REDONDEAR TODOS LOS VALORES A ENTEROS
+        const subtotalInt = Math.round(subtotal);
+        const serviceFeeInt = Math.round(serviceFee);
+        const totalInt = Math.round(total);
+
         console.log('📤 Enviando a Supabase:', {
           user_id: currentUser.id,
           user_email: currentUser.email,
           event_id: cartItem.eventId,
-          amount: total,
-          total_amount: total
+          amount: totalInt,
+          total_amount: totalInt
         });
 
         const supabaseOrder = await ordersApi.create({
@@ -532,12 +542,12 @@
           user_email: currentUser.email, // ✅ Agregar user_email
           event_id: cartItem.eventId,
           tickets: { items: [cartItem] },
-          amount: total, // ✅ Para compatibilidad con columna 'amount'
-          total_amount: total, // ✅ NÚMERO FINAL
+          amount: totalInt, // ✅ ENTERO
+          total_amount: totalInt, // ✅ ENTERO
           payment_details: { // ✅ DETALLES COMPLETOS EN JSON
-            subtotal: subtotal,
-            serviceFee: serviceFee,
-            total: total,
+            subtotal: subtotalInt,
+            serviceFee: serviceFeeInt,
+            total: totalInt,
             items: [cartItem]
           },
           status: 'completed',
@@ -588,6 +598,11 @@
 
       console.log('💰 Totales calculados:', { subtotal, serviceFee, total });
 
+      // ✅ REDONDEAR PARA EVITAR DECIMALES
+      const subtotalInt = Math.round(subtotal);
+      const serviceFeeInt = Math.round(serviceFee);
+      const totalInt = Math.round(total);
+
       const orderData = {
         order: orderNumber,
         email: currentUser.email,
@@ -595,7 +610,7 @@
         phone: document.getElementById('phone').value,
         docType: document.getElementById('docType').value,
         docNumber: document.getElementById('docNumber').value,
-        amount: total,
+        amount: totalInt,
         items: [cartItem],
         status: 'pending',
         date: new Date().toISOString(),
@@ -610,12 +625,17 @@
 
       // ✅ GUARDAR EN SUPABASE con total_amount numérico y payment_details
       try {
+        // ✅ REDONDEAR TODOS LOS VALORES A ENTEROS
+        const subtotalInt = Math.round(subtotal);
+        const serviceFeeInt = Math.round(serviceFee);
+        const totalInt = Math.round(total);
+
         console.log('📤 Enviando a Supabase:', {
           user_id: currentUser.id,
           user_email: currentUser.email,
           event_id: cartItem.eventId,
-          amount: total,
-          total_amount: total
+          amount: totalInt,
+          total_amount: totalInt
         });
 
         const supabaseOrder = await ordersApi.create({
@@ -623,12 +643,12 @@
           user_email: currentUser.email, // ✅ Agregar user_email
           event_id: cartItem.eventId,
           tickets: { items: [cartItem] },
-          amount: total, // ✅ Para compatibilidad con columna 'amount'
-          total_amount: total, // ✅ NÚMERO FINAL
+          amount: totalInt, // ✅ ENTERO
+          total_amount: totalInt, // ✅ ENTERO
           payment_details: { // ✅ DETALLES COMPLETOS EN JSON
-            subtotal: subtotal,
-            serviceFee: serviceFee,
-            total: total,
+            subtotal: subtotalInt,
+            serviceFee: serviceFeeInt,
+            total: totalInt,
             items: [cartItem],
             provider: selectedProvider
           },
