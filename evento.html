@@ -7,61 +7,391 @@
   <link rel="stylesheet" href="/src/styles.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    .event-page { padding-top: 1rem; }
-    .event-header { background: var(--blue); padding: 1rem 0; position: sticky; top: 0; z-index: 100; }
-    .event-header .container { display: flex; align-items: center; justify-content: space-between; }
-    .back-btn { display: flex; align-items: center; gap: 0.5rem; color: var(--white); font-weight: 500; text-decoration: none; }
-    .back-btn:hover { color: var(--cyan); }
-    .event-hero { position: relative; height: 300px; overflow: hidden; }
-    .event-hero img { width: 100%; height: 100%; object-fit: cover; }
-    .event-details { padding: 2rem 0; }
-    .event-grid { display: grid; grid-template-columns: 1fr; gap: 2rem; }
-    .event-info h1 { font-size: 1.75rem; font-weight: 800; color: var(--blue); margin-bottom: 1rem; }
-    .event-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; }
-    .event-meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-light); font-size: 0.9rem; }
-    .event-description { color: var(--text-light); line-height: 1.8; margin-bottom: 2rem; }
+    body { background: #f8f9fa; }
+    .event-page { padding-top: 0; min-height: 100vh; }
     
-    /* Selector de localidades */
-    .localities-section { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.5rem; }
-    .localities-section h3 { font-size: 1.1rem; font-weight: 700; color: var(--blue); margin-bottom: 1rem; }
-    .localities-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
-    .locality-card { border: 2px solid var(--border); border-radius: 10px; padding: 1rem; cursor: pointer; transition: all 0.2s; position: relative; }
-    .locality-card:hover { border-color: var(--cyan); transform: translateY(-2px); }
-    .locality-card.selected { border-color: var(--cyan); background: rgba(0, 180, 216, 0.05); }
-    .locality-card.sold-out { opacity: 0.5; cursor: not-allowed; }
-    .locality-card.sold-out:hover { transform: none; }
-    .locality-color { width: 100%; height: 80px; border-radius: 8px; margin-bottom: 0.75rem; }
-    .locality-name { font-weight: 600; color: var(--blue); margin-bottom: 0.5rem; }
-    .locality-price { font-weight: 700; color: var(--cyan); font-size: 1.1rem; }
-    .locality-availability { font-size: 0.75rem; color: var(--text-light); margin-top: 0.25rem; }
-    .sold-out-label { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(239, 68, 68, 0.9); color: white; padding: 0.5rem 1rem; border-radius: 20px; font-weight: 700; font-size: 0.8rem; }
+    /* Header mejorado */
+    .event-header { 
+      background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+      padding: 1rem 0; 
+      position: sticky; 
+      top: 0; 
+      z-index: 100;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .event-header .container { 
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between; 
+    }
+    .back-btn { 
+      display: flex; 
+      align-items: center; 
+      gap: 0.5rem; 
+      color: white; 
+      font-weight: 600; 
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+    .back-btn:hover { 
+      background: rgba(255,255,255,0.1);
+    }
     
-    /* Selector de cantidad */
-    .quantity-section { border-top: 1px solid var(--border); padding-top: 1.5rem; margin-top: 1.5rem; }
-    .quantity-controls { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
-    .quantity-label { font-weight: 600; color: var(--blue); }
-    .quantity-btns { display: flex; align-items: center; gap: 1rem; }
-    .quantity-btn { width: 40px; height: 40px; border-radius: 8px; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 1.25rem; color: var(--blue); background: var(--white); cursor: pointer; font-weight: 700; }
-    .quantity-btn:hover { background: var(--gray); border-color: var(--cyan); }
-    .quantity-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-    .quantity-value { font-size: 1.5rem; font-weight: 800; color: var(--blue); min-width: 50px; text-align: center; }
+    /* Hero mejorado */
+    .event-hero { 
+      position: relative; 
+      height: 350px; 
+      overflow: hidden;
+      border-radius: 0 0 20px 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .event-hero img { 
+      width: 100%; 
+      height: 100%; 
+      object-fit: cover; 
+    }
+    .event-hero::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 200px;
+      background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+    }
     
-    /* Total */
-    .total-section { background: var(--gray); border-radius: 10px; padding: 1.25rem; }
-    .total-row { display: flex; justify-content: space-between; margin-bottom: 0.75rem; color: var(--text-light); font-size: 0.95rem; }
-    .total-row.final { font-size: 1.25rem; font-weight: 800; color: var(--blue); margin-top: 1rem; padding-top: 1rem; border-top: 2px solid var(--border); }
-    .total-row.final span:last-child { color: var(--cyan); }
-    .buy-btn { width: 100%; padding: 1rem; background: linear-gradient(135deg, var(--yellow) 0%, #f57f17 100%); border: none; border-radius: 10px; color: white; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 1rem; }
-    .buy-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(249,168,37,0.4); }
-    .buy-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    /* Info del evento mejorada */
+    .event-details { padding: 2rem 0 4rem; }
+    .event-grid { 
+      display: grid; 
+      grid-template-columns: 1fr; 
+      gap: 2rem; 
+      max-width: 1200px;
+      margin: 0 auto;
+    }
     
-    .loading { text-align: center; padding: 3rem; color: var(--text-light); }
-    .no-localities { text-align: center; padding: 2rem; color: var(--text-light); background: var(--gray); border-radius: 10px; }
+    .event-info {
+      background: white;
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .event-info h1 { 
+      font-size: 2rem; 
+      font-weight: 800; 
+      color: #1e3a8a; 
+      margin-bottom: 1.5rem;
+      line-height: 1.2;
+    }
+    
+    .event-meta { 
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem; 
+      margin-bottom: 2rem;
+      padding: 1.5rem;
+      background: #f8f9fa;
+      border-radius: 12px;
+    }
+    
+    .event-meta-item { 
+      display: flex; 
+      align-items: flex-start; 
+      gap: 0.75rem; 
+      color: #4b5563; 
+      font-size: 0.95rem;
+    }
+    
+    .event-meta-item svg {
+      flex-shrink: 0;
+      margin-top: 2px;
+      color: #00b4d8;
+    }
+    
+    .event-meta-item strong {
+      display: block;
+      color: #1e3a8a;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+    
+    .event-description { 
+      color: #4b5563; 
+      line-height: 1.8; 
+      font-size: 1rem;
+      padding: 1.5rem;
+      background: #f8f9fa;
+      border-radius: 12px;
+      border-left: 4px solid #00b4d8;
+    }
+    
+    /* Sección de localidades mejorada */
+    .localities-section { 
+      background: white; 
+      border-radius: 16px; 
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      padding: 2rem; 
+      position: sticky;
+      top: 100px;
+    }
+    
+    .localities-section h3 { 
+      font-size: 1.25rem; 
+      font-weight: 700; 
+      color: #1e3a8a; 
+      margin-bottom: 0.5rem; 
+    }
+    
+    .localities-subtitle {
+      font-size: 0.9rem;
+      color: #6b7280;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .localities-grid { 
+      display: grid; 
+      grid-template-columns: 1fr;
+      gap: 1rem; 
+      margin-bottom: 1.5rem; 
+    }
+    
+    .locality-card { 
+      border: 2px solid #e5e7eb; 
+      border-radius: 12px; 
+      padding: 1.25rem; 
+      cursor: pointer; 
+      transition: all 0.3s; 
+      position: relative;
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+    
+    .locality-card:hover { 
+      border-color: #00b4d8; 
+      transform: translateX(4px);
+      box-shadow: 0 4px 12px rgba(0,180,216,0.15);
+    }
+    
+    .locality-card.selected { 
+      border-color: #00b4d8; 
+      background: linear-gradient(135deg, rgba(0,180,216,0.08) 0%, rgba(0,180,216,0.02) 100%);
+      box-shadow: 0 4px 12px rgba(0,180,216,0.2);
+    }
+    
+    .locality-card.sold-out { 
+      opacity: 0.5; 
+      cursor: not-allowed; 
+    }
+    
+    .locality-card.sold-out:hover { 
+      transform: none; 
+    }
+    
+    .locality-color { 
+      width: 60px; 
+      height: 60px; 
+      border-radius: 10px;
+      flex-shrink: 0;
+    }
+    
+    .locality-info {
+      flex: 1;
+    }
+    
+    .locality-name { 
+      font-weight: 700; 
+      color: #1e3a8a; 
+      margin-bottom: 0.25rem;
+      font-size: 1.05rem;
+    }
+    
+    .locality-price { 
+      font-weight: 700; 
+      color: #00b4d8; 
+      font-size: 1.3rem;
+      margin-bottom: 0.25rem;
+    }
+    
+    .locality-availability { 
+      font-size: 0.8rem; 
+      color: #6b7280;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    
+    .locality-availability::before {
+      content: '•';
+      color: #10b981;
+      font-size: 1.2rem;
+    }
+    
+    .sold-out-label { 
+      position: absolute; 
+      top: 50%; 
+      left: 50%; 
+      transform: translate(-50%, -50%); 
+      background: #ef4444; 
+      color: white; 
+      padding: 0.5rem 1rem; 
+      border-radius: 20px; 
+      font-weight: 700; 
+      font-size: 0.8rem;
+      box-shadow: 0 2px 8px rgba(239,68,68,0.3);
+    }
+    
+    /* Selector de cantidad mejorado */
+    .quantity-section { 
+      border-top: 2px solid #e5e7eb; 
+      padding-top: 1.5rem; 
+      margin-top: 1.5rem; 
+    }
+    
+    .quantity-controls { 
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between; 
+      margin-bottom: 1.5rem;
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 10px;
+    }
+    
+    .quantity-label { 
+      font-weight: 600; 
+      color: #1e3a8a;
+      font-size: 0.95rem;
+    }
+    
+    .quantity-btns { 
+      display: flex; 
+      align-items: center; 
+      gap: 1rem; 
+    }
+    
+    .quantity-btn { 
+      width: 40px; 
+      height: 40px; 
+      border-radius: 50%; 
+      border: 2px solid #00b4d8; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      font-size: 1.25rem; 
+      color: #00b4d8; 
+      background: white; 
+      cursor: pointer; 
+      font-weight: 700;
+      transition: all 0.2s;
+    }
+    
+    .quantity-btn:hover { 
+      background: #00b4d8;
+      color: white;
+      transform: scale(1.1);
+    }
+    
+    .quantity-btn:disabled { 
+      opacity: 0.3; 
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .quantity-value { 
+      font-size: 1.5rem; 
+      font-weight: 800; 
+      color: #1e3a8a; 
+      min-width: 50px; 
+      text-align: center; 
+    }
+    
+    /* Total mejorado */
+    .total-section { 
+      background: linear-gradient(135deg, #f8f9fa 0%, #e5e7eb 100%); 
+      border-radius: 12px; 
+      padding: 1.5rem;
+      border: 2px solid #e5e7eb;
+    }
+    
+    .total-row { 
+      display: flex; 
+      justify-content: space-between; 
+      margin-bottom: 0.75rem; 
+      color: #4b5563; 
+      font-size: 0.95rem; 
+    }
+    
+    .total-row.final { 
+      font-size: 1.4rem; 
+      font-weight: 800; 
+      color: #1e3a8a; 
+      margin-top: 1rem; 
+      padding-top: 1rem; 
+      border-top: 2px solid #cbd5e1; 
+    }
+    
+    .total-row.final span:last-child { 
+      color: #00b4d8; 
+    }
+    
+    .buy-btn { 
+      width: 100%; 
+      padding: 1.25rem; 
+      background: linear-gradient(135deg, #f9a825 0%, #f57f17 100%); 
+      border: none; 
+      border-radius: 12px; 
+      color: white; 
+      font-size: 1.05rem; 
+      font-weight: 700; 
+      cursor: pointer; 
+      margin-top: 1rem;
+      transition: all 0.3s;
+      box-shadow: 0 4px 12px rgba(249,168,37,0.3);
+    }
+    
+    .buy-btn:hover { 
+      transform: translateY(-2px); 
+      box-shadow: 0 6px 20px rgba(249,168,37,0.4); 
+    }
+    
+    .buy-btn:disabled { 
+      opacity: 0.5; 
+      cursor: not-allowed; 
+      transform: none; 
+    }
+    
+    .loading { 
+      text-align: center; 
+      padding: 4rem; 
+      color: #6b7280;
+      font-size: 1.1rem;
+    }
+    
+    .no-localities { 
+      text-align: center; 
+      padding: 2rem; 
+      color: #6b7280; 
+      background: #f8f9fa; 
+      border-radius: 12px;
+      border: 2px dashed #cbd5e1;
+    }
     
     @media (min-width: 768px) {
-      .event-grid { grid-template-columns: 1fr 420px; }
-      .event-hero { height: 400px; }
-      .event-info h1 { font-size: 2.25rem; }
+      .event-grid { grid-template-columns: 1.5fr 1fr; }
+      .event-hero { height: 450px; }
+      .event-info h1 { font-size: 2.5rem; }
+      .localities-grid { grid-template-columns: 1fr; }
+    }
+    
+    @media (min-width: 1024px) {
+      .event-hero { height: 500px; }
     }
   </style>
 </head>
@@ -73,9 +403,10 @@
           <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
         Volver
-       <a href="/" class="logo">
-  <img src="public/logos/tuboleta-logo.png" alt="Tuboleta" style="height:35px;width:auto;" />
-</a>
+      </a>
+      <a href="/" class="logo">
+        <img src="/Logos/tuboleta-logo.png" alt="Tuboleta" style="height:32px;width:auto;" />
+      </a>
     </div>
   </header>
 
@@ -110,7 +441,6 @@
           return;
         }
 
-        // Cargar tickets/localidades del evento
         try {
           tickets = await ticketsApi.getByEventId(eventId);
           console.log('Tickets cargados:', tickets);
@@ -119,17 +449,15 @@
           tickets = [];
         }
 
-        // Si no hay tickets en la base de datos, crear tickets por defecto
         if (!tickets || tickets.length === 0) {
           console.log('No hay tickets en la BD, creando tickets por defecto...');
           
-          // Crear tickets por defecto para este evento
           const defaultTickets = [
             {
               event_id: eventId,
               type: 'General',
               price: event.price || 50000,
-              total: 100,
+              quantity: 100,
               available: 100,
               color: '#60a5fa'
             },
@@ -137,7 +465,7 @@
               event_id: eventId,
               type: 'VIP',
               price: (event.price || 50000) * 2,
-              total: 50,
+              quantity: 50,
               available: 50,
               color: '#fbbf24'
             },
@@ -145,24 +473,21 @@
               event_id: eventId,
               type: 'Platea',
               price: (event.price || 50000) * 1.5,
-              total: 75,
+              quantity: 75,
               available: 75,
               color: '#34d399'
             }
           ];
 
-          // Intentar crear los tickets en la base de datos
           try {
             for (const ticket of defaultTickets) {
               await ticketsApi.create(ticket);
             }
             
-            // Recargar los tickets
             tickets = await ticketsApi.getByEventId(eventId);
             console.log('Tickets por defecto creados:', tickets);
           } catch (error) {
             console.error('Error al crear tickets por defecto:', error);
-            // Si falla, usar los tickets por defecto en memoria
             tickets = defaultTickets.map((t, index) => ({
               ...t,
               id: index + 1
@@ -194,32 +519,46 @@
                 <h1>${event.title}</h1>
                 <div class="event-meta">
                   <div class="event-meta-item">
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <svg width="24" height="24" viewBox="0 0 20 20" fill="none">
                       <path d="M6.667 1.667v2.5M13.333 1.667v2.5M2.917 7.5h14.166M4.167 3.333h11.666c.92 0 1.667.746 1.667 1.667v11.667c0 .92-.746 1.666-1.667 1.666H4.167c-.92 0-1.667-.746-1.667-1.666V5c0-.92.746-1.667 1.667-1.667z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                    <span>${event.date_full}</span>
+                    <div>
+                      <strong>Fecha</strong>
+                      <span>${event.date_full}</span>
+                    </div>
                   </div>
                   <div class="event-meta-item">
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <svg width="24" height="24" viewBox="0 0 20 20" fill="none">
                       <path d="M10 17.5a7.5 7.5 0 100-15 7.5 7.5 0 000 15z" stroke="currentColor" stroke-width="1.5"/>
                       <path d="M10 5v5l3.333 1.667" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                     </svg>
-                    <span>${event.time}</span>
+                    <div>
+                      <strong>Hora</strong>
+                      <span>${event.time}</span>
+                    </div>
                   </div>
                   <div class="event-meta-item">
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <svg width="24" height="24" viewBox="0 0 20 20" fill="none">
                       <path d="M17.5 8.333c0 5.834-7.5 10-7.5 10s-7.5-4.166-7.5-10a7.5 7.5 0 1115 0z" stroke="currentColor" stroke-width="1.5"/>
                       <path d="M10 10.833a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" stroke="currentColor" stroke-width="1.5"/>
                     </svg>
-                    <span>${event.venue} - ${event.city}</span>
+                    <div>
+                      <strong>Lugar</strong>
+                      <span>${event.venue}</span>
+                      <span style="display:block;margin-top:0.25rem;">${event.city}</span>
+                    </div>
                   </div>
                 </div>
-                ${event.description ? `<p class="event-description">${event.description}</p>` : ''}
+                ${event.description ? `<div class="event-description">${event.description}</div>` : ''}
               </div>
 
               <div class="localities-section">
-                <h3>Selecciona una localidad</h3>
-                <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 1rem;">
+                <h3>Selecciona tu localidad</h3>
+                <p class="localities-subtitle">
+                  <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+                    <path d="M10 18.333c4.602 0 8.333-3.731 8.333-8.333S14.602 1.667 10 1.667 1.667 5.398 1.667 10s3.731 8.333 8.333 8.333z" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M10 6.667V10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
                   Elige tu ubicación preferida
                 </p>
                 <div class="localities-grid" id="localitiesGrid"></div>
@@ -254,7 +593,7 @@
                   </div>
 
                   <button class="buy-btn" id="buyBtn">
-                    Añadir al carrito
+                    🛒 Añadir al carrito
                   </button>
                 </div>
               </div>
@@ -283,9 +622,11 @@
                data-id="${ticket.id}"
                ${!soldOut ? `onclick="selectLocality(${ticket.id})"` : ''}>
             <div class="locality-color" style="background: ${ticket.color || '#60a5fa'}"></div>
-            <div class="locality-name">${ticket.type}</div>
-            <div class="locality-price">${formatPrice(ticket.price)}</div>
-            <div class="locality-availability">${ticket.available || 0} disponibles</div>
+            <div class="locality-info">
+              <div class="locality-name">${ticket.type}</div>
+              <div class="locality-price">${formatPrice(ticket.price)}</div>
+              <div class="locality-availability">${ticket.available || 0} disponibles</div>
+            </div>
             ${soldOut ? '<div class="sold-out-label">AGOTADO</div>' : ''}
           </div>
         `;
@@ -293,12 +634,10 @@
     }
 
     window.selectLocality = function(ticketId) {
-      // Remover selección anterior
       document.querySelectorAll('.locality-card').forEach(card => {
         card.classList.remove('selected');
       });
 
-      // Seleccionar nueva localidad
       const card = document.querySelector(`[data-id="${ticketId}"]`);
       if (card) {
         card.classList.add('selected');
@@ -313,8 +652,6 @@
       
       quantity = 1;
       document.getElementById('quantityValue').textContent = '1';
-      
-      // Mostrar sección de cantidad
       document.getElementById('quantitySection').style.display = 'block';
       
       updatePrices();
@@ -369,10 +706,7 @@
           total: (selectedTicket.price * quantity) * 1.1
         };
 
-        // Guardar en localStorage
         localStorage.setItem('tuboleta-cart', JSON.stringify(cartItem));
-        
-        // Redirigir al checkout
         window.location.href = '/checkout.html';
       });
     }
@@ -391,7 +725,6 @@
       document.getElementById('totalPrice').textContent = formatPrice(total);
     }
 
-    // Iniciar carga del evento
     loadEvent();
   </script>
 </body>
