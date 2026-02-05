@@ -11,7 +11,9 @@ export default defineConfig({
         misOrdenes: resolve(__dirname, 'mis-ordenes.html'),
         misBoletas: resolve(__dirname, 'mis-boletas.html'),
         confirmacion: resolve(__dirname, 'confirmacion.html'),
-        checkout: resolve(__dirname, 'checkout.html')
+        checkout: resolve(__dirname, 'checkout.html'),
+        admin: resolve(__dirname, 'admin.html'),
+        adminLogin: resolve(__dirname, 'admin-login.html')
       }
     }
   }
