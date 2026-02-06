@@ -77,15 +77,37 @@
   background: rgba(255, 255, 255, 1);
 }
 
+/* Eliminar espacio entre banner y sección de destacados */
+#destacados {
+  margin-top: 0 !important;
+  padding-top: 2rem !important;
+}
+
+.section {
+  margin-top: 0 !important;
+}
+
+.section:first-of-type {
+  padding-top: 2rem !important;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .featured-banner {
     height: 300px;
+  }
+  
+  #destacados {
+    padding-top: 1.5rem !important;
   }
 }
 
 @media (max-width: 480px) {
   .featured-banner {
     height: 200px;
+  }
+  
+  #destacados {
+    padding-top: 1rem !important;
   }
 }
