@@ -9,8 +9,8 @@
   height: 450px;
   position: relative;
   overflow: hidden;
-  margin: 0;
-  padding: 0;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 .banner-slider {
@@ -77,18 +77,34 @@
   background: rgba(255, 255, 255, 1);
 }
 
-/* Eliminar espacio entre banner y sección de destacados */
+/* ========================================
+   ELIMINAR ESPACIO ENTRE BANNER Y EVENTOS
+   ======================================== */
+
+/* Quitar margen superior de main */
+main {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+/* Quitar padding de la primera sección (Destacados) */
+.section:first-of-type,
 #destacados {
-  margin-top: 0 !important;
-  padding-top: 2rem !important;
-}
-
-.section {
+  padding-top: 0 !important;
   margin-top: 0 !important;
 }
 
-.section:first-of-type {
-  padding-top: 2rem !important;
+/* Agregar solo un pequeño padding interno */
+.section:first-of-type .container,
+#destacados .container {
+  padding-top: 2rem;
+}
+
+/* Asegurar que no haya espacio en ninguna sección después del banner */
+.featured-banner + .section,
+.featured-banner ~ main .section:first-child {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
 }
 
 /* Responsive */
@@ -97,8 +113,9 @@
     height: 300px;
   }
   
-  #destacados {
-    padding-top: 1.5rem !important;
+  .section:first-of-type .container,
+  #destacados .container {
+    padding-top: 1.5rem;
   }
 }
 
@@ -107,7 +124,8 @@
     height: 200px;
   }
   
-  #destacados {
-    padding-top: 1rem !important;
+  .section:first-of-type .container,
+  #destacados .container {
+    padding-top: 1rem;
   }
 }
