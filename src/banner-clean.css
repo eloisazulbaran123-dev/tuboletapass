@@ -2,9 +2,8 @@
  * ============================================
  * BANNER LIMPIO - SOLUCIÓN DEFINITIVA
  * ============================================
- * Este CSS corrige el problema real:
- * El .featured-banner (400px) y .banner-slider (280px)
- * tienen alturas diferentes, creando espacio en blanco
+ * Muestra la imagen completa del banner sin cortarla
+ * y elimina todo el texto y espacios en blanco
  */
 
 /* ========================================
@@ -14,7 +13,7 @@
 /* Banner contenedor - altura completa */
 .featured-banner {
   position: relative;
-  height: 450px !important;
+  height: 280px !important;
   overflow: hidden;
   margin: 0 !important;
   padding: 0 !important;
@@ -23,20 +22,20 @@
 /* Slider debe tener la MISMA altura que el banner */
 .banner-slider {
   width: 100%;
-  height: 100% !important; /* ← ESTO es clave, antes era 280px */
+  height: 100% !important;
   position: relative;
   margin: 0 !important;
   padding: 0 !important;
 }
 
-/* Slides ocupan todo el espacio */
+/* Slides ocupan todo el espacio - CONTAIN para mostrar imagen completa */
 .banner-slide {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-size: cover !important; /* Cambiar de contain a cover */
+  background-size: contain !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
   opacity: 0;
@@ -147,13 +146,13 @@ main > .section:not(:first-of-type) {
 
 @media (max-width: 1024px) {
   .featured-banner {
-    height: 400px !important;
+    height: 250px !important;
   }
 }
 
 @media (max-width: 768px) {
   .featured-banner {
-    height: 300px !important;
+    height: 200px !important;
   }
   
   main > .section:first-of-type > .container,
@@ -164,7 +163,7 @@ main > .section:not(:first-of-type) {
 
 @media (max-width: 480px) {
   .featured-banner {
-    height: 250px !important;
+    height: 150px !important;
   }
   
   main > .section:first-of-type > .container,
