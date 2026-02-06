@@ -9,84 +9,217 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-/* Botón Tuboleta Pass */
-.tuboleta-pass-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  background: #0077b6;
-  border-radius: 8px;
-  text-decoration: none;
-  transition: 0.2s;
-}
-.tuboleta-pass-btn:hover {
-  background: #0096c7;
-  transform: translateY(-1px);
+/* Header simplificado */
+.header {
+  background: var(--blue);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-/* Ícono circular */
-.user-circle-icon {
-  width: 32px;
-  height: 32px;
-  background: #005f8f;
-  border-radius: 50%;
+.header-top {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.header-top .container {
+  display: none; /* Ocultar la navegación superior por ahora */
+}
+
+/* Search bar como header principal */
+.search-container {
+  padding: 1rem 0;
+}
+
+.search-bar {
+  background: white;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  gap: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.search-filter {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  border-right: 1px solid var(--border);
+  transition: background 0.2s;
+  border-radius: 25px;
+  min-width: 140px;
+}
+
+.search-filter:hover {
+  background: #f8f9fa;
+}
+
+.search-filter:last-of-type {
+  border-right: none;
+}
+
+.search-filter svg {
+  color: var(--blue);
+  flex-shrink: 0;
+}
+
+.search-filter span {
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.search-input-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0 1rem;
+}
+
+.search-input-wrapper svg {
+  color: var(--text-light);
+  flex-shrink: 0;
+}
+
+.search-input {
+  border: none;
+  outline: none;
+  flex: 1;
+  font-size: 0.95rem;
+  color: var(--text);
+  background: transparent;
+}
+
+.search-input::placeholder {
+  color: var(--text-light);
+}
+
+.search-btn {
+  background: var(--yellow);
+  color: white;
+  padding: 0.75rem 2rem;
+  border-radius: 25px;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-.user-circle-icon svg {
-  width: 18px;
-  height: 18px;
+  font-weight: 600;
+  transition: all 0.3s;
+  flex-shrink: 0;
 }
 
-/* Logo */
-.tuboleta-logo-img {
-  height: 26px;
+.search-btn:hover {
+  background: #d4a600;
+  transform: scale(1.05);
+}
+
+.search-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Dropdown de filtros */
+.filter-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  margin-top: 0.5rem;
+  min-width: 200px;
+  display: none;
+  z-index: 1000;
+}
+
+.filter-dropdown.active {
+  display: block;
+}
+
+.filter-dropdown button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--text);
+  transition: background 0.2s;
+}
+
+.filter-dropdown button:hover {
+  background: var(--gray);
+}
+
+.filter-dropdown button:first-child {
+  border-radius: 8px 8px 0 0;
+}
+
+.filter-dropdown button:last-child {
+  border-radius: 0 0 8px 8px;
+}
+
+/* Date input oculto */
+.date-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .search-bar {
+    flex-wrap: wrap;
+    padding: 0.75rem;
+    border-radius: 16px;
+  }
+  
+  .search-filter {
+    min-width: auto;
+    flex: 1;
+    padding: 0.5rem;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+  
+  .search-input-wrapper {
+    width: 100%;
+    order: 10;
+    margin-top: 0.5rem;
+  }
+  
+  .search-btn {
+    width: 100%;
+    order: 11;
+    margin-top: 0.5rem;
+  }
+}
+
+/* Ocultar elementos innecesarios del header */
+.header-actions,
+.nav-desktop,
+.mobile-menu-btn {
+  display: none !important;
+}
+
+.header-content {
+  display: none;
 }
 </style>
 
 </head>
 <body>
-  <!-- Header -->
+  <!-- Header Simplificado -->
   <header class="header" id="header">
-    <div class="container header-content">
-      <a href="/" class="logo">
-  <img src="public/logos/tuboleta-logo.png" alt="Tuboleta" style="height:35px;width:auto;" />
-</a>
-
-      <nav class="nav-desktop">
-        <a href="#conciertos">Conciertos</a>
-        <a href="#teatro">Teatro</a>
-        <a href="#deportes">Deportes</a>
-        <a href="/mis-ordenes.html">Mis Órdenes</a>
-        <div class="nav-dropdown">
-          <button class="nav-dropdown-btn">
-            Más <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-          </button>
-          <div class="nav-dropdown-content">
-            <a href="#familiar">Familiar</a>
-            <a href="#festivales">Festivales</a>
-            <a href="#experiencias">Experiencias</a>
-          </div>
-        </div>
-      </nav>
-
-      <div class="header-actions">
-        <a href="#" class="header-link">Bono Regalo</a>
-        <a href="#" class="header-link">Contáctanos</a>
-        <!-- El auth-ui se insertará aquí automáticamente -->
-        <button class="cart-btn" id="cartBtn">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-          <span class="cart-badge" id="cartBadge">0</span>
-        </button>
-        <button class="mobile-menu-btn" id="mobileMenuBtn">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-        </button>
-      </div>
-    </div>
-
-    <!-- Search Bar -->
+    <!-- Search Bar como header principal -->
     <div class="container search-container">
       <div class="search-bar">
         <div class="search-filter" id="cityFilter">
@@ -139,25 +272,6 @@
       <div class="search-results" id="searchResults"></div>
     </div>
   </header>
-
-  <!-- Mobile Menu -->
-  <div class="mobile-menu" id="mobileMenu">
-    <div class="mobile-menu-header">
-      <span class="logo">Tub<span class="logo-accent">o</span>leta</span>
-      <button class="mobile-menu-close" id="mobileMenuClose">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-    <nav class="mobile-nav">
-      <a href="#conciertos">Conciertos</a>
-      <a href="#teatro">Teatro</a>
-      <a href="#deportes">Deportes</a>
-      <a href="/mis-ordenes.html">Mis Órdenes</a>
-      <a href="#familiar">Familiar</a>
-      <a href="#festivales">Festivales</a>
-      <a href="#experiencias">Experiencias</a>
-    </nav>
-  </div>
 
   <!-- Main Content -->
   <main>
@@ -277,26 +391,6 @@
       </div>
     </div>
   </footer>
-
-  <!-- Cart Drawer -->
-  <div class="drawer-overlay" id="cartOverlay"></div>
-  <div class="cart-drawer" id="cartDrawer">
-    <div class="drawer-header">
-      <h3>Tu carrito</h3>
-      <button class="drawer-close" id="cartClose">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-    <div class="drawer-content" id="cartContent"></div>
-    <div class="drawer-footer" id="cartFooter" style="display: none;">
-      <div class="cart-totals">
-        <div class="cart-total-row"><span>Subtotal</span><span id="cartSubtotal">$0</span></div>
-        <div class="cart-total-row"><span>Servicio (10%)</span><span id="cartFee">$0</span></div>
-        <div class="cart-total-row total"><span>Total</span><span id="cartTotal">$0</span></div>
-      </div>
-      <a href="checkout.html" class="btn-primary btn-block">Ir al checkout</a>
-    </div>
-  </div>
 
   <script type="module" src="/src/main.ts"></script>
 </body>
