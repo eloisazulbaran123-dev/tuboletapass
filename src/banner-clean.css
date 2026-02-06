@@ -1,48 +1,60 @@
 /* 
- * BANNER LIMPIO - Solo imagen sin texto
- * Agregar este CSS después de styles.css
+ * ============================================
+ * BANNER LIMPIO - SOLUCIÓN DEFINITIVA
+ * ============================================
+ * Este CSS corrige el problema real:
+ * El .featured-banner (400px) y .banner-slider (280px)
+ * tienen alturas diferentes, creando espacio en blanco
  */
 
-/* Banner sin texto - solo imagen */
+/* ========================================
+   CORREGIR ALTURAS DEL BANNER
+   ======================================== */
+
+/* Banner contenedor - altura completa */
 .featured-banner {
-  width: 100%;
-  height: 450px;
   position: relative;
+  height: 450px !important;
   overflow: hidden;
   margin: 0 !important;
   padding: 0 !important;
 }
 
+/* Slider debe tener la MISMA altura que el banner */
 .banner-slider {
   width: 100%;
-  height: 100%;
+  height: 100% !important; /* ← ESTO es clave, antes era 280px */
   position: relative;
   margin: 0 !important;
   padding: 0 !important;
 }
 
+/* Slides ocupan todo el espacio */
 .banner-slide {
-  width: 100%;
-  height: 100%;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  display: none;
   position: absolute;
   top: 0;
   left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover !important; /* Cambiar de contain a cover */
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  opacity: 0;
+  transition: opacity 0.5s;
 }
 
 .banner-slide.active {
-  display: block;
+  opacity: 1;
 }
 
-/* Ocultar completamente el overlay y todo el contenido de texto */
+/* ========================================
+   OCULTAR TEXTO DEL BANNER
+   ======================================== */
+
 .banner-overlay {
   display: none !important;
 }
 
-/* Ocultar todos los elementos de texto dentro del banner */
 .banner-overlay * {
   display: none !important;
 }
@@ -55,7 +67,10 @@
   display: none !important;
 }
 
-/* Dots del slider */
+/* ========================================
+   DOTS DEL SLIDER
+   ======================================== */
+
 .banner-dots {
   position: absolute;
   bottom: 20px;
@@ -80,10 +95,10 @@
 }
 
 /* ========================================
-   ELIMINAR TODO EL ESPACIO
+   ELIMINAR ESPACIOS ENTRE SECCIONES
    ======================================== */
 
-/* Eliminar espacio del header al banner */
+/* Sin espacio entre header y banner */
 .header {
   margin-bottom: 0 !important;
 }
@@ -93,46 +108,55 @@
   padding-bottom: 1rem !important;
 }
 
-/* Eliminar TODO espacio de main */
+/* Sin espacio en main */
 body main {
   margin: 0 !important;
   padding: 0 !important;
 }
 
-/* Eliminar espacio entre banner y primera sección */
+/* Sin espacio entre banner y primera sección */
 .featured-banner {
   margin-bottom: 0 !important;
 }
 
-/* Primera sección sin padding superior */
+/* Primera sección (Destacados) sin padding superior */
 main > .section:first-of-type,
 main > section:first-of-type,
+section.section#destacados,
 #destacados {
   padding-top: 0 !important;
   margin-top: 0 !important;
 }
 
-/* El container interno sí tiene padding */
+/* Padding solo DENTRO del container */
 main > .section:first-of-type > .container,
 main > section:first-of-type > .container,
+section.section#destacados > .container,
 #destacados > .container {
   padding-top: 2rem !important;
 }
 
-/* Las demás secciones mantienen su padding normal */
-main > .section:not(:first-of-type),
-main > section:not(:first-of-type) {
+/* Las demás secciones mantienen padding normal */
+main > .section:not(:first-of-type) {
   padding-top: 3rem;
 }
 
-/* Responsive */
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 1024px) {
+  .featured-banner {
+    height: 400px !important;
+  }
+}
+
 @media (max-width: 768px) {
   .featured-banner {
-    height: 300px;
+    height: 300px !important;
   }
   
   main > .section:first-of-type > .container,
-  main > section:first-of-type > .container,
   #destacados > .container {
     padding-top: 1.5rem !important;
   }
@@ -140,12 +164,30 @@ main > section:not(:first-of-type) {
 
 @media (max-width: 480px) {
   .featured-banner {
-    height: 200px;
+    height: 250px !important;
   }
   
   main > .section:first-of-type > .container,
-  main > section:first-of-type > .container,
   #destacados > .container {
     padding-top: 1rem !important;
   }
+}
+
+/* ========================================
+   ASEGURAR QUE SE APLIQUE SOBRE TODO
+   ======================================== */
+
+/* Forzar que banner-slider tenga altura 100% */
+.featured-banner > .banner-slider {
+  height: 100% !important;
+  min-height: 100% !important;
+  max-height: 100% !important;
+}
+
+/* Asegurar que no hay márgenes ocultos */
+.featured-banner::before,
+.featured-banner::after,
+.banner-slider::before,
+.banner-slider::after {
+  display: none !important;
 }
