@@ -555,38 +555,6 @@
                   DESCARGAR CÓDIGO QR
                 </button>
               </div>
-              
-              ${config.accountName || config.bankName || config.accountNumber ? `
-                <div class="bank-details">
-                  <h4>
-                    📋 Datos bancarios (alternativa manual)
-                  </h4>
-                  ${config.accountName ? `
-                    <div class="bank-detail-row">
-                      <span class="bank-detail-label">Titular:</span>
-                      <span class="bank-detail-value">${config.accountName}</span>
-                    </div>
-                  ` : ''}
-                  ${config.bankName ? `
-                    <div class="bank-detail-row">
-                      <span class="bank-detail-label">Banco:</span>
-                      <span class="bank-detail-value">${config.bankName}</span>
-                    </div>
-                  ` : ''}
-                  ${config.accountNumber ? `
-                    <div class="bank-detail-row">
-                      <span class="bank-detail-label">Cuenta:</span>
-                      <span class="bank-detail-value">${config.accountNumber}</span>
-                    </div>
-                  ` : ''}
-                  ${config.nit ? `
-                    <div class="bank-detail-row">
-                      <span class="bank-detail-label">NIT:</span>
-                      <span class="bank-detail-value">${config.nit}</span>
-                    </div>
-                  ` : ''}
-                </div>
-              ` : ''}
             </div>
           `;
         }
