@@ -17,6 +17,8 @@
   width: 100%;
   height: 100%;
   position: relative;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 .banner-slide {
@@ -53,7 +55,7 @@
   display: none !important;
 }
 
-/* Dots del slider (opcional - puedes comentar esto si quieres mantener los dots) */
+/* Dots del slider */
 .banner-dots {
   position: absolute;
   bottom: 20px;
@@ -78,33 +80,49 @@
 }
 
 /* ========================================
-   ELIMINAR ESPACIO ENTRE BANNER Y EVENTOS
+   ELIMINAR TODO EL ESPACIO
    ======================================== */
 
-/* Quitar margen superior de main */
-main {
-  margin-top: 0 !important;
-  padding-top: 0 !important;
+/* Eliminar espacio del header al banner */
+.header {
+  margin-bottom: 0 !important;
 }
 
-/* Quitar padding de la primera sección (Destacados) */
-.section:first-of-type,
+.search-container {
+  margin-bottom: 0 !important;
+  padding-bottom: 1rem !important;
+}
+
+/* Eliminar TODO espacio de main */
+body main {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Eliminar espacio entre banner y primera sección */
+.featured-banner {
+  margin-bottom: 0 !important;
+}
+
+/* Primera sección sin padding superior */
+main > .section:first-of-type,
+main > section:first-of-type,
 #destacados {
   padding-top: 0 !important;
   margin-top: 0 !important;
 }
 
-/* Agregar solo un pequeño padding interno */
-.section:first-of-type .container,
-#destacados .container {
-  padding-top: 2rem;
+/* El container interno sí tiene padding */
+main > .section:first-of-type > .container,
+main > section:first-of-type > .container,
+#destacados > .container {
+  padding-top: 2rem !important;
 }
 
-/* Asegurar que no haya espacio en ninguna sección después del banner */
-.featured-banner + .section,
-.featured-banner ~ main .section:first-child {
-  padding-top: 0 !important;
-  margin-top: 0 !important;
+/* Las demás secciones mantienen su padding normal */
+main > .section:not(:first-of-type),
+main > section:not(:first-of-type) {
+  padding-top: 3rem;
 }
 
 /* Responsive */
@@ -113,9 +131,10 @@ main {
     height: 300px;
   }
   
-  .section:first-of-type .container,
-  #destacados .container {
-    padding-top: 1.5rem;
+  main > .section:first-of-type > .container,
+  main > section:first-of-type > .container,
+  #destacados > .container {
+    padding-top: 1.5rem !important;
   }
 }
 
@@ -124,8 +143,9 @@ main {
     height: 200px;
   }
   
-  .section:first-of-type .container,
-  #destacados .container {
-    padding-top: 1rem;
+  main > .section:first-of-type > .container,
+  main > section:first-of-type > .container,
+  #destacados > .container {
+    padding-top: 1rem !important;
   }
 }
