@@ -1,0 +1,91 @@
+/* 
+ * BANNER LIMPIO - Solo imagen sin texto
+ * Agregar este CSS después de styles.css
+ */
+
+/* Banner sin texto - solo imagen */
+.featured-banner {
+  width: 100%;
+  height: 450px;
+  position: relative;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+.banner-slider {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.banner-slide {
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.banner-slide.active {
+  display: block;
+}
+
+/* Ocultar completamente el overlay y todo el contenido de texto */
+.banner-overlay {
+  display: none !important;
+}
+
+/* Ocultar todos los elementos de texto dentro del banner */
+.banner-overlay * {
+  display: none !important;
+}
+
+.banner-tag,
+.banner-slide h2,
+.banner-slide p,
+.banner-slide button,
+.banner-slide .btn-primary {
+  display: none !important;
+}
+
+/* Dots del slider (opcional - puedes comentar esto si quieres mantener los dots) */
+.banner-dots {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.banner-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.banner-dot.active {
+  background: rgba(255, 255, 255, 1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .featured-banner {
+    height: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .featured-banner {
+    height: 200px;
+  }
+}
