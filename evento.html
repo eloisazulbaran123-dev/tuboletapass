@@ -58,6 +58,41 @@
     .loading { text-align: center; padding: 3rem; color: var(--text-light); }
     .no-localities { text-align: center; padding: 2rem; color: var(--text-light); background: var(--gray); border-radius: 10px; }
     
+    /* ============================================
+       SECCIÓN DEL PLANO DEL EVENTO (NUEVO)
+       ============================================ */
+    .event-venue-map {
+      margin-top: 2rem;
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.5rem;
+    }
+    
+    .event-venue-map h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--blue);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .venue-map-container {
+      width: 100%;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    
+    .venue-map-container img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    /* ============================================ */
+    
     @media (min-width: 768px) {
       .event-grid { grid-template-columns: 1fr 420px; }
       .event-hero { height: 400px; }
@@ -215,6 +250,23 @@
                   </div>
                 </div>
                 ${event.description ? `<p class="event-description">${event.description}</p>` : ''}
+                
+                <!-- SECCIÓN DEL PLANO DEL EVENTO (NUEVO) -->
+                ${event.venue_map ? `
+                  <div class="event-venue-map">
+                    <h3>
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M17.5 8.333c0 5.834-7.5 10-7.5 10s-7.5-4.166-7.5-10a7.5 7.5 0 1115 0z" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M10 10.833a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" stroke="currentColor" stroke-width="1.5"/>
+                      </svg>
+                      Plano del Evento
+                    </h3>
+                    <div class="venue-map-container">
+                      <img src="${event.venue_map}" alt="Plano de ${event.venue}" loading="lazy">
+                    </div>
+                  </div>
+                ` : ''}
+                <!-- FIN SECCIÓN DEL PLANO -->
               </div>
 
               <div class="localities-section">
