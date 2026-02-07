@@ -1,31 +1,31 @@
-import { auth, supabase } from './supabase.ts';
+import { auth, supabase, ordersApi, formatPrice } from './supabase.ts';
 
 // Estado global
 let cartItem = null;
 let selectedPaymentMethod = null;
 let selectedProvider = null;
+let currentUser = null;
 
 // Inicializar checkout
 async function init() {
-
   // ===== VERIFICAR AUTENTICACIÓN =====
   try {
-    const session = await auth.getSession();
-    if (!session) {
+    currentUser = await auth.getUser();
+    
+    if (!currentUser) {
       console.log('❌ Usuario no autenticado');
       localStorage.setItem('redirect-after-login', window.location.pathname);
       alert('Debes iniciar sesión para continuar con la compra');
       window.location.href = '/login.html';
       return;
     }
-    console.log('✅ Usuario autenticado');
+    console.log('✅ Usuario autenticado:', currentUser.email);
   } catch (error) {
     console.error('Error verificando sesión:', error);
     localStorage.setItem('redirect-after-login', window.location.pathname);
     window.location.href = '/login.html';
     return;
   }
-  // ===== FIN VERIFICACIÓN =====
 
   // Cargar carrito
   const cart = localStorage.getItem('tuboleta-cart');
@@ -36,13 +36,13 @@ async function init() {
 
   try {
     cartItem = JSON.parse(cart);
+    console.log('🛒 Carrito cargado:', cartItem);
+    
     renderCart();
     renderSummary();
     setupPaymentMethods();
     setupProviders();
     setupPayButton();
-    
-    // Pre-llenar datos del usuario si está logueado
     await prefillUserData();
   } catch (error) {
     console.error('Error al inicializar checkout:', error);
@@ -52,33 +52,26 @@ async function init() {
 
 // Pre-llenar datos del usuario
 async function prefillUserData() {
-  try {
-    const userData = await auth.getUserData();
-    if (userData) {
-      // Pre-llenar email
-      const emailInput = document.getElementById('email');
-      if (emailInput && userData.email) {
-        emailInput.value = userData.email;
-        emailInput.readOnly = true; // Bloquear si está logueado
-      }
+  if (!currentUser) return;
 
-      // Pre-llenar nombre si está disponible
-      const nameInput = document.getElementById('name');
-      if (nameInput && userData.user_metadata?.full_name) {
-        nameInput.value = userData.user_metadata.full_name;
-      }
+  const emailInput = document.getElementById('email');
+  const nameInput = document.getElementById('name');
+  const phoneInput = document.getElementById('phone');
 
-      // Pre-llenar teléfono si está disponible
-      const phoneInput = document.getElementById('phone');
-      if (phoneInput && userData.user_metadata?.phone) {
-        phoneInput.value = userData.user_metadata.phone;
-      }
-
-      console.log('✅ Datos del usuario pre-llenados');
-    }
-  } catch (error) {
-    console.log('Usuario no logueado, usando formulario vacío');
+  if (emailInput && currentUser.email) {
+    emailInput.value = currentUser.email;
+    emailInput.disabled = true;
   }
+
+  if (nameInput && currentUser.name) {
+    nameInput.value = currentUser.name;
+  }
+
+  if (phoneInput && currentUser.phone) {
+    phoneInput.value = currentUser.phone;
+  }
+
+  console.log('✅ Datos del usuario pre-llenados');
 }
 
 // Renderizar carrito
@@ -88,14 +81,20 @@ function renderCart() {
   const cartContainer = document.getElementById('cartItems');
   if (!cartContainer) return;
 
+  const eventImage = cartItem.eventImage || cartItem.image || '';
+  const eventName = cartItem.eventName || cartItem.title || '';
+  const eventVenue = cartItem.eventVenue || cartItem.venue || '';
+  const eventDate = cartItem.eventDate || '';
+  const ticketType = cartItem.ticketType || '';
+
   cartContainer.innerHTML = `
     <div class="order-item">
-      <img src="${cartItem.eventImage}" alt="${cartItem.eventName}">
+      <img src="${eventImage}" alt="${eventName}">
       <div class="order-item-info">
-        <h4>${cartItem.eventName}</h4>
-        <p>${cartItem.eventVenue}</p>
-        <p>${cartItem.eventDate}</p>
-        <p style="color:var(--cyan);font-weight:600;margin-top:0.5rem;">${cartItem.ticketType}</p>
+        <h4>${eventName}</h4>
+        <p>${eventVenue}</p>
+        <p>${eventDate}</p>
+        <p style="color:var(--cyan);font-weight:600;margin-top:0.5rem;">${ticketType}</p>
       </div>
     </div>
   `;
@@ -113,7 +112,6 @@ function renderSummary() {
   document.getElementById('fee').textContent = formatPrice(fee);
   document.getElementById('total').textContent = formatPrice(total);
 
-  // Items en resumen
   const summaryItems = document.getElementById('summaryItems');
   if (summaryItems) {
     summaryItems.innerHTML = `
@@ -132,49 +130,22 @@ function renderSummary() {
 function setupPaymentMethods() {
   const paymentMethods = document.querySelectorAll('.payment-method');
   
-  if (paymentMethods.length === 0) {
-    console.warn('⚠️ No se encontraron métodos de pago');
-    // Reintentar después de un pequeño delay
-    setTimeout(setupPaymentMethods, 100);
-    return;
-  }
-
-  console.log('✅ Configurando', paymentMethods.length, 'métodos de pago');
-
   paymentMethods.forEach(method => {
     method.addEventListener('click', () => {
-      console.log('🔄 Método seleccionado:', method.dataset.method);
-      
-      // Remover selección anterior
       document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
-      
-      // Seleccionar nuevo
       method.classList.add('selected');
       selectedPaymentMethod = method.dataset.method;
 
-      // Mostrar/ocultar formularios
       const cardForm = document.getElementById('cardForm');
       const transferForm = document.getElementById('transferForm');
 
       if (selectedPaymentMethod === 'card') {
-        if (cardForm) {
-          cardForm.classList.remove('hidden');
-          cardForm.style.display = 'block';
-        }
-        if (transferForm) {
-          transferForm.classList.add('hidden');
-          transferForm.style.display = 'none';
-        }
+        cardForm?.classList.remove('hidden');
+        transferForm?.classList.add('hidden');
         selectedProvider = null;
       } else {
-        if (cardForm) {
-          cardForm.classList.add('hidden');
-          cardForm.style.display = 'none';
-        }
-        if (transferForm) {
-          transferForm.classList.remove('hidden');
-          transferForm.style.display = 'block';
-        }
+        cardForm?.classList.add('hidden');
+        transferForm?.classList.remove('hidden');
       }
     });
   });
@@ -184,25 +155,12 @@ function setupPaymentMethods() {
 function setupProviders() {
   const providers = document.querySelectorAll('.provider-option');
   
-  if (providers.length === 0) {
-    console.warn('⚠️ No se encontraron proveedores');
-    // Reintentar después de un pequeño delay
-    setTimeout(setupProviders, 100);
-    return;
-  }
-
-  console.log('✅ Configurando', providers.length, 'proveedores');
-
   providers.forEach(provider => {
     provider.addEventListener('click', () => {
-      console.log('💳 Proveedor seleccionado:', provider.dataset.provider);
-      
-      // Remover selección anterior
       document.querySelectorAll('.provider-option').forEach(p => p.classList.remove('selected'));
-      
-      // Seleccionar nuevo
       provider.classList.add('selected');
       selectedProvider = provider.dataset.provider;
+      console.log('💳 Proveedor seleccionado:', selectedProvider);
     });
   });
 }
@@ -225,8 +183,8 @@ function setupPayButton() {
         await processTransferPayment();
       }
     } catch (error) {
-      console.error('Error al procesar pago:', error);
-      alert('Error al procesar el pago. Por favor intenta nuevamente.');
+      console.error('❌ Error al procesar pago:', error);
+      alert('Error al procesar el pago: ' + error.message);
       payBtn.disabled = false;
       payBtn.textContent = 'Pagar';
     }
@@ -260,7 +218,6 @@ function validateForm() {
       return false;
     }
 
-    // Validación básica de tarjeta
     if (cardNumber.replace(/\s/g, '').length < 15) {
       alert('Número de tarjeta inválido');
       return false;
@@ -275,143 +232,167 @@ function validateForm() {
   return true;
 }
 
-// Procesar pago con tarjeta
+// Procesar pago con tarjeta - GUARDAR EN SUPABASE
 async function processCardPayment() {
-  const orderNumber = generateOrderNumber();
+  const orderNumber = 'TB-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
   
-  // Obtener email del usuario logueado o del formulario
-  let userEmail = document.getElementById('email').value;
+  const userName = document.getElementById('name').value.trim();
+  const userPhone = document.getElementById('phone').value.trim();
+  
+  if (!userName) {
+    alert('❌ Por favor ingresa tu nombre');
+    throw new Error('Nombre requerido');
+  }
+
+  // Calcular totales CORRECTAMENTE
+  const subtotal = parseInt(Math.round(cartItem.subtotal || (cartItem.total / 1.1)));
+  const serviceFee = parseInt(Math.round(cartItem.serviceFee || (cartItem.total - subtotal)));
+  const total = parseInt(Math.round(cartItem.total || 0));
+
   try {
-    const userData = await auth.getUserData();
-    if (userData && userData.email) {
-      userEmail = userData.email;
-    }
+    console.log('💳 Procesando pago con tarjeta...');
+    console.log('📊 Totales calculados:', { subtotal, serviceFee, total });
+    
+    // GUARDAR EN SUPABASE usando ordersApi
+    const orderData = {
+      user_id: currentUser.id,
+      user_email: currentUser.email,
+      user_name: userName,
+      event_id: parseInt(cartItem.eventId),
+      tickets: {
+        ticketType: cartItem.ticketType,
+        quantity: cartItem.quantity,
+        price: cartItem.price || cartItem.subtotal
+      },
+      amount: total,
+      total_amount: total,
+      payment_details: {
+        subtotal: subtotal,
+        serviceFee: serviceFee,
+        total: total,
+        ticketType: cartItem.ticketType,
+        quantity: cartItem.quantity
+      },
+      status: 'completed',
+      payment_method: 'card',
+      payment_reference: orderNumber
+    };
+
+    console.log('📤 Guardando orden en Supabase:', orderData);
+    
+    const supabaseOrder = await ordersApi.create(orderData);
+    
+    console.log('✅ Orden guardada en Supabase con ID:', supabaseOrder.id);
+    
+    // Guardar en localStorage para página de confirmación
+    localStorage.setItem('tuboleta-last-order', JSON.stringify({
+      orderId: supabaseOrder.id,
+      orderNumber: orderNumber,
+      email: currentUser.email,
+      name: userName,
+      phone: userPhone,
+      amount: total,
+      status: 'completed',
+      paymentMethod: 'card'
+    }));
+
+    // Limpiar carrito
+    localStorage.removeItem('tuboleta-cart');
+
+    console.log('✅ Redirigiendo a confirmación...');
+    
+    // Ir a confirmación
+    window.location.href = '/confirmacion.html';
+    
   } catch (error) {
-    console.log('Usuario no logueado, usando email del formulario');
+    console.error('❌ Error guardando orden:', error);
+    alert('Error al guardar la orden: ' + error.message);
+    throw error;
   }
-
-  const orderData = {
-    order: orderNumber,
-    email: userEmail,  // ← Email del usuario
-    name: document.getElementById('name').value,
-    phone: document.getElementById('phone').value,
-    amount: cartItem.total,
-    items: [{
-      eventName: cartItem.eventName,
-      eventImage: cartItem.eventImage,
-      ticketType: cartItem.ticketType,
-      quantity: cartItem.quantity,
-      subtotal: cartItem.subtotal
-    }],
-    status: 'completed',
-    date: new Date().toISOString(),
-    paymentMethod: 'card',
-    cardLastFour: document.getElementById('cardNumber').value.slice(-4)
-  };
-
-  // Guardar en localStorage
-  const cardPayments = JSON.parse(localStorage.getItem('tuboleta-card-payments') || '[]');
-  cardPayments.push(orderData);
-  localStorage.setItem('tuboleta-card-payments', JSON.stringify(cardPayments));
-
-  // Limpiar carrito
-  localStorage.removeItem('tuboleta-cart');
-
-  // Mostrar éxito
-  // Guardar orden pagada
-localStorage.setItem('tuboleta-last-order', JSON.stringify({
-  order: orderNumber,
-  ref: null,
-  amount: cartItem.total,
-  status: 'paid'
-}));
-
-// Ir a pantalla de confirmación
-window.location.href = '/confirmacion.html';
-
 }
 
-// Procesar pago con transferencia/billetera
+// Procesar pago con transferencia - GUARDAR EN SUPABASE
 async function processTransferPayment() {
-  const orderNumber = generateOrderNumber();
-  const referenceNumber = generateReferenceNumber();
+  const orderNumber = 'TB-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+  const referenceNumber = Math.floor(100000000 + Math.random() * 900000000).toString();
 
-  // 🔹 Obtener email del usuario logueado o del formulario
-  let userEmail = document.getElementById('email').value;
+  const userName = document.getElementById('name').value.trim();
+  const userPhone = document.getElementById('phone').value.trim();
+  
+  if (!userName) {
+    alert('❌ Por favor ingresa tu nombre');
+    throw new Error('Nombre requerido');
+  }
+
+  // Calcular totales CORRECTAMENTE
+  const subtotal = parseInt(Math.round(cartItem.subtotal || (cartItem.total / 1.1)));
+  const serviceFee = parseInt(Math.round(cartItem.serviceFee || (cartItem.total - subtotal)));
+  const total = parseInt(Math.round(cartItem.total || 0));
 
   try {
-    const userData = await auth.getUserData();
-    if (userData && userData.email) {
-      userEmail = userData.email;
-    }
-  } catch (e) {
-    console.log('Usuario no logueado, usando email del formulario');
+    console.log('🏦 Procesando pago con transferencia...');
+    console.log('📊 Totales calculados:', { subtotal, serviceFee, total });
+    console.log('💳 Proveedor:', selectedProvider);
+    
+    // GUARDAR EN SUPABASE usando ordersApi
+    const orderData = {
+      user_id: currentUser.id,
+      user_email: currentUser.email,
+      user_name: userName,
+      event_id: parseInt(cartItem.eventId),
+      tickets: {
+        ticketType: cartItem.ticketType,
+        quantity: cartItem.quantity,
+        price: cartItem.price || cartItem.subtotal
+      },
+      amount: total,
+      total_amount: total,
+      payment_details: {
+        subtotal: subtotal,
+        serviceFee: serviceFee,
+        total: total,
+        ticketType: cartItem.ticketType,
+        quantity: cartItem.quantity,
+        provider: selectedProvider
+      },
+      status: 'pending',
+      payment_method: 'transfer',
+      payment_reference: referenceNumber
+    };
+
+    console.log('📤 Guardando orden en Supabase:', orderData);
+    
+    const supabaseOrder = await ordersApi.create(orderData);
+    
+    console.log('✅ Orden guardada en Supabase con ID:', supabaseOrder.id);
+    
+    // Guardar en localStorage para página de confirmación
+    localStorage.setItem('tuboleta-last-order', JSON.stringify({
+      orderId: supabaseOrder.id,
+      orderNumber: orderNumber,
+      referenceNumber: referenceNumber,
+      email: currentUser.email,
+      name: userName,
+      phone: userPhone,
+      amount: total,
+      status: 'pending',
+      paymentMethod: 'transfer',
+      provider: selectedProvider
+    }));
+
+    // Limpiar carrito
+    localStorage.removeItem('tuboleta-cart');
+
+    console.log('✅ Redirigiendo a confirmación...');
+    
+    // Ir a confirmación
+    window.location.href = '/confirmacion.html';
+    
+  } catch (error) {
+    console.error('❌ Error guardando orden:', error);
+    alert('Error al guardar la orden: ' + error.message);
+    throw error;
   }
-
-  // 🧾 GUARDAR ORDEN EN SUPABASE
-try {
-  const userData = await auth.getUserData();
-  const userEmail = userData?.email || document.getElementById('email').value;
-
-  const { error } = await supabase
-  .from('orders')
-  .insert({
-    order_number: orderNumber,
-    payment_reference: referenceNumber,
-    payment_method: 'transfer',
-    provider: selectedProvider,
-    total_amount: cartItem.total,
-    status: 'pending',
-    email: userEmail,
-    name: document.getElementById('name').value,
-    phone: document.getElementById('phone').value,
-    event_name: cartItem.eventName,
-    ticket_type: cartItem.ticketType,
-    quantity: cartItem.quantity
-  });
-
-  if (error) {
-    console.error('❌ Error guardando orden en BD:', error);
-  } else {
-    console.log('✅ Orden guardada en Supabase');
-  }
-
-} catch (err) {
-  console.error('❌ Error general guardando orden:', err);
-}
-  // 💾 GUARDAR DATOS PARA LA PÁGINA DE CONFIRMACIÓN
-  localStorage.setItem('tuboleta-last-order', JSON.stringify({
-    order: orderNumber,
-    ref: referenceNumber,
-    amount: cartItem.total,
-    status: 'pending'
-  }));
-
-  // 🛒 LIMPIAR CARRITO
-  localStorage.removeItem('tuboleta-cart');
-
-  // 🚀 IR A LA PANTALLA DE CONFIRMACIÓN
-  window.location.href = '/confirmacion.html';
-}
-
-// Generar número de orden
-function generateOrderNumber() {
-  const timestamp = Date.now();
-  const random = Math.floor(Math.random() * 1000);
-  return `TB-${timestamp}${random}`;
-}
-
-// Generar número de referencia
-function generateReferenceNumber() {
-  return Math.floor(100000000 + Math.random() * 900000000).toString();
-}
-
-// Mostrar éxito
-function showSuccess(orderNumber) {
-  document.getElementById('checkoutStep').classList.add('hidden');
-  document.getElementById('pendingStep').classList.add('hidden');
-  document.getElementById('successStep').classList.remove('hidden');
-  document.getElementById('successOrder').textContent = orderNumber;
 }
 
 // Mostrar carrito vacío
@@ -420,8 +401,8 @@ function showEmptyCart() {
   if (!container) return;
 
   container.innerHTML = `
-    <div class="empty-cart">
-      <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:0.3;margin-bottom:1.5rem;">
+    <div class="empty-cart" style="text-align:center;padding:3rem 1rem;">
+      <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:0.3;margin:0 auto 1.5rem;">
         <circle cx="9" cy="21" r="1"/>
         <circle cx="20" cy="21" r="1"/>
         <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>
@@ -433,17 +414,12 @@ function showEmptyCart() {
   `;
 }
 
-// Formatear precio
-function formatPrice(price) {
-  return '$' + Math.round(price).toLocaleString('es-CO');
-}
-
 // Auto-format card number
 const cardNumberInput = document.getElementById('cardNumber');
 if (cardNumberInput) {
   cardNumberInput.addEventListener('input', (e) => {
     let value = e.target.value.replace(/\s/g, '');
-    let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+    let formattedValue = value.match(/.{1,4}/g/)?.join(' ') || value;
     e.target.value = formattedValue;
   });
 }
@@ -459,16 +435,6 @@ if (cardExpiryInput) {
     e.target.value = value;
   });
 }
-
-// Copiar referencia
-window.copyReference = function() {
-  const ref = document.getElementById('pendingRef').textContent;
-  navigator.clipboard.writeText(ref).then(() => {
-    alert('Referencia copiada');
-  }).catch(err => {
-    console.error('Error al copiar:', err);
-  });
-};
 
 // Inicializar
 if (document.readyState === 'loading') {
