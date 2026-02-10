@@ -424,149 +424,145 @@ async function saveEventTickets(eventId) {
     }
   }
 }
+    // ===== ÓRDENES DESDE SUPABASE =====
+async function loadOrders() {
+  const list = document.getElementById('ordersList');
+  if (list) list.innerHTML = '<div class="empty-state">Cargando órdenes...</div>';
 
-    // ===== ÓRDENES =====
-    function loadOrders() {
-      const list = document.getElementById('ordersList');
-      if (list) list.innerHTML = '<div class="empty-state">Cargando...</div>';
+  try {
+    const { data, error } = await supabase
+      .from('orders')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-      setTimeout(() => {
-        try {
-          const cardPayments = JSON.parse(localStorage.getItem('tuboleta-card-payments') || '[]');
-          const pendingPayments = JSON.parse(localStorage.getItem('tuboleta-pending') || '[]');
-          
-          allOrders = [
-            ...cardPayments.map(p => ({
-              ...p,
-              id: p.order,
-              order_number: p.order,
-              user_name: p.name,
-              user_email: p.email,
-              user_phone: p.phone || 'N/A',
-              created_at: p.date,
-              payment_method: 'Tarjeta',
-              payment_ref: p.cardLastFour ? `**** ${p.cardLastFour}` : 'N/A'
-            })),
-            ...pendingPayments.map(p => ({
-              ...p,
-              id: p.order,
-              order_number: p.order,
-              user_name: p.name,
-              user_email: p.email,
-              user_phone: p.phone || 'N/A',
-              created_at: p.date,
-              payment_method: p.provider,
-              payment_ref: p.ref
-            }))
-          ];
+    if (error) throw error;
 
-          allOrders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-          updateOrdersStats();
-          renderOrders();
-        } catch (error) {
-          console.error('Error:', error);
-          if (list) list.innerHTML = '<div class="empty-state">Error al cargar órdenes</div>';
-        }
-      }, 300);
-    }
+    allOrders = (data || []).map(order => ({
+      ...order,
+      id: order.id,
+      order_number: order.payment_reference || `TB-${order.id}`,
+      user_name: order.user_name || 'N/A',
+      user_email: order.user_email || 'N/A',
+      user_phone: 'N/A',
+      amount: order.total_amount || 0,
+      items: order.tickets?.items || [{
+        eventName: 'Evento',
+        ticketType: order.tickets?.ticketType || 'General',
+        quantity: order.tickets?.quantity || 1,
+        subtotal: order.amount || 0
+      }],
+      payment_method: order.payment_method === 'card' ? 'Tarjeta' : (order.payment_details?.provider || 'Transferencia'),
+      payment_ref: order.payment_reference || 'N/A',
+      created_at: order.created_at,
+      status: order.status
+    }));
 
-    function updateOrdersStats() {
-      const total = allOrders.length;
-      const pending = allOrders.filter(o => o.status === 'pending').length;
-      const confirmed = allOrders.filter(o => o.status === 'confirmed').length;
-      const completed = allOrders.filter(o => o.status === 'completed').length;
+    console.log(`✅ ${allOrders.length} órdenes cargadas desde Supabase`);
+    updateOrdersStats();
+    renderOrders();
+  } catch (error) {
+    console.error('❌ Error cargando órdenes:', error);
+    if (list) list.innerHTML = `<div class="empty-state">Error: ${error.message}</div>`;
+  }
+}
 
-      document.getElementById('totalOrders').textContent = total;
-      document.getElementById('pendingOrders').textContent = pending;
-      document.getElementById('confirmedOrders').textContent = confirmed;
-      document.getElementById('completedOrders').textContent = completed;
-    }
+function updateOrdersStats() {
+  const total = allOrders.length;
+  const pending = allOrders.filter(o => o.status === 'pending').length;
+  const confirmed = allOrders.filter(o => o.status === 'confirmed').length;
+  const completed = allOrders.filter(o => o.status === 'completed').length;
 
-    function renderOrders() {
-      const list = document.getElementById('ordersList');
-      if (!list) return;
+  document.getElementById('totalOrders').textContent = total;
+  document.getElementById('pendingOrders').textContent = pending;
+  document.getElementById('confirmedOrders').textContent = confirmed;
+  document.getElementById('completedOrders').textContent = completed;
+}
 
-      let orders = currentFilter === 'all' ? allOrders : allOrders.filter(o => o.status === currentFilter);
+function renderOrders() {
+  const list = document.getElementById('ordersList');
+  if (!list) return;
 
-      if (orders.length === 0) {
-        list.innerHTML = '<div class="empty-state">No hay órdenes</div>';
-        return;
-      }
+  let orders = currentFilter === 'all' ? allOrders : allOrders.filter(o => o.status === currentFilter);
 
-      list.innerHTML = orders.map(order => {
-        const statusText = {
-          'pending': 'Pendiente',
-          'confirmed': 'Confirmada',
-          'completed': 'Completada',
-          'rejected': 'Rechazada'
-        }[order.status] || order.status;
+  if (orders.length === 0) {
+    list.innerHTML = '<div class="empty-state">No hay órdenes' + (currentFilter !== 'all' ? ` con estado "${currentFilter}"` : '') + '</div>';
+    return;
+  }
 
-        return `
-          <div class="order-row">
-            <div class="order-info">
-              <h4>${order.order_number}</h4>
-              <p><strong>${order.user_name}</strong></p>
-              <p>📧 ${order.user_email}</p>
-              <p>📱 ${order.user_phone}</p>
-              <p>🕐 ${new Date(order.created_at).toLocaleString('es-CO')}</p>
-              <div class="order-details">
-                <h5>Items:</h5>
-                <div class="order-items">
-                  ${order.items.map(item => `
-                    <div class="order-item">
-                      <span>${item.eventName} - ${item.ticketType} x${item.quantity}</span>
-                      <span>$${Math.round(item.subtotal).toLocaleString('es-CO')}</span>
-                    </div>
-                  `).join('')}
+  list.innerHTML = orders.map(order => {
+    const statusText = {
+      'pending': 'Pendiente',
+      'confirmed': 'Confirmada',
+      'completed': 'Completada',
+      'rejected': 'Rechazada'
+    }[order.status] || order.status;
+
+    return `
+      <div class="order-row">
+        <div class="order-info">
+          <h4>${order.order_number}</h4>
+          <p><strong>${order.user_name}</strong></p>
+          <p>📧 ${order.user_email}</p>
+          <p>📱 ${order.user_phone}</p>
+          <p>🕐 ${new Date(order.created_at).toLocaleString('es-CO')}</p>
+          <div class="order-details">
+            <h5>Items:</h5>
+            <div class="order-items">
+              ${order.items.map(item => `
+                <div class="order-item">
+                  <span>${item.eventName} - ${item.ticketType} x${item.quantity}</span>
+                  <span>$${Math.round(item.subtotal).toLocaleString('es-CO')}</span>
                 </div>
-              </div>
-            </div>
-            <div class="order-info">
-              <p style="font-weight:700;color:var(--cyan);font-size:1.1rem;">$${Math.round(order.amount).toLocaleString('es-CO')}</p>
-              <p style="margin-top:0.5rem;"><strong>Método:</strong> ${order.payment_method}</p>
-              <p><strong>Ref:</strong> ${order.payment_ref}</p>
-              <span class="order-status ${order.status}">${statusText}</span>
-            </div>
-            <div class="order-actions">
-              ${order.status === 'pending' ? `
-                <button class="action-btn confirm" onclick="window.confirmOrder('${order.id}')">✓ Confirmar</button>
-                <button class="action-btn reject" onclick="window.rejectOrder('${order.id}')">✗ Rechazar</button>
-              ` : ''}
+              `).join('')}
             </div>
           </div>
-        `;
-      }).join('');
-    }
+        </div>
+        <div class="order-info">
+          <p style="font-weight:700;color:var(--cyan);font-size:1.1rem;">$${Math.round(order.amount).toLocaleString('es-CO')}</p>
+          <p style="margin-top:0.5rem;"><strong>Método:</strong> ${order.payment_method}</p>
+          <p><strong>Ref:</strong> ${order.payment_ref}</p>
+          <span class="order-status ${order.status}">${statusText}</span>
+        </div>
+        <div class="order-actions">
+          ${order.status === 'pending' ? `
+            <button class="action-btn confirm" onclick="window.confirmOrder(${order.id})">✓ Confirmar</button>
+            <button class="action-btn reject" onclick="window.rejectOrder(${order.id})">✗ Rechazar</button>
+          ` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
 
-    window.confirmOrder = function(orderId) {
-      if (!confirm('¿Confirmar esta orden?')) return;
-      updateOrderStatus(orderId, 'confirmed');
-      showToast('Orden confirmada', 'success');
-      loadOrders();
-    };
+window.confirmOrder = async function(orderId) {
+  if (!confirm('¿Confirmar esta orden?')) return;
+  await updateOrderStatus(orderId, 'confirmed');
+  showToast('Orden confirmada', 'success');
+};
 
-    window.rejectOrder = function(orderId) {
-      if (!confirm('¿Rechazar esta orden?')) return;
-      updateOrderStatus(orderId, 'rejected');
-      showToast('Orden rechazada', 'error');
-      loadOrders();
-    };
+window.rejectOrder = async function(orderId) {
+  if (!confirm('¿Rechazar esta orden?')) return;
+  await updateOrderStatus(orderId, 'rejected');
+  showToast('Orden rechazada', 'success');
+};
 
-    function updateOrderStatus(orderId, status) {
-      const cardPayments = JSON.parse(localStorage.getItem('tuboleta-card-payments') || '[]');
-      const cardIndex = cardPayments.findIndex(p => p.order === orderId);
-      if (cardIndex !== -1) {
-        cardPayments[cardIndex].status = status;
-        localStorage.setItem('tuboleta-card-payments', JSON.stringify(cardPayments));
-      }
+async function updateOrderStatus(orderId, status) {
+  try {
+    const { error } = await supabase
+      .from('orders')
+      .update({ status })
+      .eq('id', orderId);
 
-      const pendingPayments = JSON.parse(localStorage.getItem('tuboleta-pending') || '[]');
-      const pendingIndex = pendingPayments.findIndex(p => p.order === orderId);
-      if (pendingIndex !== -1) {
-        pendingPayments[pendingIndex].status = status;
-        localStorage.setItem('tuboleta-pending', JSON.stringify(pendingPayments));
-      }
-    }
+    if (error) throw error;
+
+    console.log(`✅ Orden ${orderId} actualizada a ${status}`);
+    await loadOrders();
+  } catch (error) {
+    console.error('❌ Error actualizando orden:', error);
+    showToast('Error al actualizar orden', 'error');
+  }
+}
+
 
     // ===== EVENTOS DESDE SUPABASE =====
     async function loadEvents() {
