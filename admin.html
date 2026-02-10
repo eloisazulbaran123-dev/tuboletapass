@@ -299,9 +299,21 @@
             <input type="text" id="time" placeholder="7:00 PM" required>
           </div>
           <div class="form-group">
-            <label>Descripción</label>
-            <textarea id="description" rows="3"></textarea>
-            <!-- LOCALIDADES -->
+  <label>Descripción</label>
+  <textarea id="description" rows="3"></textarea>
+</div>
+
+<!-- NUEVO CAMPO: PLANO DEL EVENTO -->
+<div class="form-group">
+  <label>Plano del Evento (Opcional)</label>
+  <input type="url" id="venue_map" placeholder="https://ejemplo.com/plano-evento.png">
+  <small style="color:var(--text-light);font-size:0.8rem;display:block;margin-top:0.25rem;">
+    URL de la imagen del plano del evento
+  </small>
+</div>
+
+<!-- LOCALIDADES -->
+
 <div class="form-group">
   <label style="display:flex;justify-content:space-between;align-items:center;">
     <span>Localidades / Tipos de Boleta</span>
@@ -635,6 +647,7 @@ async function updateOrderStatus(orderId, status) {
         document.getElementById('date_full').value = event.date_full;
         document.getElementById('time').value = event.time;
         document.getElementById('description').value = event.description || '';
+        document.getElementById('venue_map').value = event.venue_map || '';
       } else {
         document.getElementById('modalTitle').textContent = 'Nuevo Evento';
         document.getElementById('eventForm').reset();
@@ -667,56 +680,97 @@ async function updateOrderStatus(orderId, status) {
     };
 
     window.saveEvent = async function() {
-      const title = document.getElementById('title').value;
-      const image = document.getElementById('image').value;
-      const venue = document.getElementById('venue').value;
-      const city = document.getElementById('city').value;
-      const category = document.getElementById('category').value;
-      const price = parseInt(document.getElementById('price').value);
-      const date_day = document.getElementById('date_day').value;
-      const date_month = document.getElementById('date_month').value;
-      const date_full = document.getElementById('date_full').value;
-      const time = document.getElementById('time').value;
-      const description = document.getElementById('description').value;
+  // Obtener valores del formulario
+  const title = document.getElementById('title').value.trim();
+  const image = document.getElementById('image').value.trim();
+  const venue = document.getElementById('venue').value.trim();
+  const city = document.getElementById('city').value;
+  const category = document.getElementById('category').value;
+  const price = parseInt(document.getElementById('price').value);
+  const date_day = document.getElementById('date_day').value.trim();
+  const date_month = document.getElementById('date_month').value.trim();
+  const date_full = document.getElementById('date_full').value.trim();
+  const time = document.getElementById('time').value.trim();
+  const description = document.getElementById('description').value.trim();
+  const venue_map = document.getElementById('venue_map').value.trim(); // NUEVO CAMPO
 
-      if (!title || !image || !venue || !city || !category || !price || !date_day || !date_month || !date_full || !time) {
-        alert('Por favor completa todos los campos obligatorios');
-        return;
-      }
-      if (ticketTypes.length === 0) {
-  alert('Debes agregar al menos una localidad');
-  return;
-}
-
-for (const ticket of ticketTypes) {
-  if (!ticket.type || !ticket.price || !ticket.quantity) {
-    alert('Completa todos los campos de las localidades');
+  // Validación de campos obligatorios
+  if (!title) {
+    showToast('Por favor ingresa el título del evento', 'error');
     return;
   }
-}
-      const eventData = {
-        title, image, venue, city, category, price,
-        date_day, date_month, date_full, time, description
-      };
 
-      try {
-        if (editingEventId) {
-  await eventsApi.update(editingEventId, eventData);
-  await saveEventTickets(editingEventId);
-  showToast('Evento actualizado', 'success');
-} else {
-  const newEvent = await eventsApi.create(eventData);
-  await saveEventTickets(newEvent.id);
-  showToast('Evento creado', 'success');
-}
+  if (!venue) {
+    showToast('Por favor ingresa el lugar del evento', 'error');
+    return;
+  }
 
-        window.closeEventModal();
-        await loadEvents();
-      } catch (error) {
-        console.error('Error:', error);
-        showToast('Error al guardar evento: ' + error.message, 'error');
-      }
-    };
+  if (!price || price <= 0) {
+    showToast('Por favor ingresa un precio válido', 'error');
+    return;
+  }
+
+  if (!date_day || !date_month || !date_full || !time) {
+    showToast('Por favor completa todos los campos de fecha y hora', 'error');
+    return;
+  }
+
+  // Validar localidades
+  if (ticketTypes.length === 0) {
+    showToast('Por favor agrega al menos una localidad', 'error');
+    return;
+  }
+
+  for (const ticket of ticketTypes) {
+    if (!ticket.type || !ticket.price || !ticket.quantity) {
+      showToast('Por favor completa todos los campos de las localidades', 'error');
+      return;
+    }
+  }
+
+  // Preparar datos del evento
+  const eventData = {
+    title,
+    image: image || 'https://via.placeholder.com/600x400',
+    venue,
+    city,
+    category,
+    price,
+    date_day,
+    date_month,
+    date_full,
+    time,
+    description,
+    venue_map: venue_map || null // INCLUIR PLANO DEL EVENTO
+  };
+
+  try {
+    console.log('💾 Guardando evento...', eventData);
+
+    if (editingEventId) {
+      // ACTUALIZAR evento existente
+      const updatedEvent = await eventsApi.update(editingEventId, eventData);
+      console.log('✅ Evento actualizado:', updatedEvent);
+      
+      await saveEventTickets(editingEventId);
+      showToast('Evento actualizado exitosamente', 'success');
+    } else {
+      // CREAR nuevo evento
+      const newEvent = await eventsApi.create(eventData);
+      console.log('✅ Evento creado:', newEvent);
+      
+      await saveEventTickets(newEvent.id);
+      showToast('Evento creado exitosamente', 'success');
+    }
+
+    window.closeEventModal();
+    await loadEvents();
+    
+  } catch (error) {
+    console.error('❌ Error al guardar evento:', error);
+    showToast('Error al guardar evento: ' + error.message, 'error');
+  }
+};
 
     // ===== CONFIGURACIÓN QR CON UPLOAD =====
     async function loadQRConfig() {
