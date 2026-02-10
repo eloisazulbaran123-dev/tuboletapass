@@ -1,5 +1,4 @@
 import { createClient } from '@supabase/supabase-js'
-//port type { User as SupabaseUser } from '@supabase/auth-js'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -26,6 +25,7 @@ export interface Event {
   date_full: string;
   time: string;
   description?: string;
+  venue_map?: string; // NUEVO: Plano del evento
   created_at?: string;
 }
 
@@ -42,9 +42,13 @@ export interface Ticket {
 export interface Order {
   id: number;
   user_id: string;
+  user_email: string;
+  user_name: string;
   event_id: number;
   tickets: any;
+  amount: number;
   total_amount: number;
+  payment_details?: any;
   status: string;
   payment_method?: string;
   payment_reference?: string;
@@ -71,67 +75,64 @@ interface AdminUser {
 // AUTENTICACIÓN (UNIFICADA)
 // ============================================
 export const auth = {
-  // Obtener usuario actual
   // Obtener usuario actual (normalizado)
-async getUser(): Promise<{
-  id: string;
-  email: string;
-  name: string;
-  phone: string;
-} | null> {
-  const { data: { user }, error } = await supabase.auth.getUser();
-
-  if (error) {
-    console.error('Error getting user:', error);
-    return null;
-  }
-
-  if (!user) return null;
-
-  return {
-    id: user.id,
-    email: user.email ?? '',
-    name: user.user_metadata?.name ?? '',
-    phone: user.user_metadata?.phone ?? ''
-  };
-},
-
-// Alias para compatibilidad con código de clientes
-async getUserData() {
-  return this.getUser();
-},
-
-
-  // Obtener sesión actual (normalizada)
-async getSession(): Promise<{
-  access_token: string;
-  user: {
+  async getUser(): Promise<{
     id: string;
     email: string;
     name: string;
     phone: string;
-  };
-} | null> {
-  const { data: { session }, error } = await supabase.auth.getSession();
+  } | null> {
+    const { data: { user }, error } = await supabase.auth.getUser();
 
-  if (error) {
-    console.error('Error getting session:', error);
-    return null;
-  }
-
-  if (!session) return null;
-
-  return {
-    access_token: session.access_token,
-    user: {
-      id: session.user.id,
-      email: session.user.email ?? '',
-      name: session.user.user_metadata?.name ?? '',
-      phone: session.user.user_metadata?.phone ?? ''
+    if (error) {
+      console.error('Error getting user:', error);
+      return null;
     }
-  };
-},
 
+    if (!user) return null;
+
+    return {
+      id: user.id,
+      email: user.email ?? '',
+      name: user.user_metadata?.name ?? '',
+      phone: user.user_metadata?.phone ?? ''
+    };
+  },
+
+  // Alias para compatibilidad con código de clientes
+  async getUserData() {
+    return this.getUser();
+  },
+
+  // Obtener sesión actual (normalizada)
+  async getSession(): Promise<{
+    access_token: string;
+    user: {
+      id: string;
+      email: string;
+      name: string;
+      phone: string;
+    };
+  } | null> {
+    const { data: { session }, error } = await supabase.auth.getSession();
+
+    if (error) {
+      console.error('Error getting session:', error);
+      return null;
+    }
+
+    if (!session) return null;
+
+    return {
+      access_token: session.access_token,
+      user: {
+        id: session.user.id,
+        email: session.user.email ?? '',
+        name: session.user.user_metadata?.name ?? '',
+        phone: session.user.user_metadata?.phone ?? ''
+      }
+    };
+  },
 
   // Login con email y contraseña (para admin - con verificación)
   async signInAdmin(email: string, password: string): Promise<{ user: any; error: any }> {
@@ -146,13 +147,13 @@ async getSession(): Promise<{
 
     // Verificar que el usuario sea admin
     const normalizedUser = data.user
-  ? {
-      id: data.user.id,
-      email: data.user.email ?? '',
-      name: data.user.user_metadata?.name ?? '',
-      phone: data.user.user_metadata?.phone ?? ''
-    }
-  : null;
+      ? {
+          id: data.user.id,
+          email: data.user.email ?? '',
+          name: data.user.user_metadata?.name ?? '',
+          phone: data.user.user_metadata?.phone ?? ''
+        }
+      : null;
 
     const isAdmin = normalizedUser ? await this.isAdmin(normalizedUser) : false;
     if (!isAdmin) {
@@ -163,7 +164,7 @@ async getSession(): Promise<{
       };
     }
 
-   return { user: data.user ?? null, error: null };
+    return { user: data.user ?? null, error: null };
   },
 
   // Login simple para clientes (sin verificación de admin)
@@ -318,6 +319,8 @@ export const eventsApi = {
   },
 
   async create(eventData: Omit<Event, 'id' | 'created_at'>): Promise<Event> {
+    console.log('📝 Creando evento:', eventData);
+    
     const { data, error } = await supabase
       .from('events')
       .insert([eventData])
@@ -325,32 +328,38 @@ export const eventsApi = {
       .single();
 
     if (error) {
-      console.error('Error creating event:', error);
+      console.error('❌ Error creating event:', error);
       throw error;
     }
 
-    // Crear tickets por defecto
-    if (data) {
-      await ticketsApi.createDefaults(data.id);
-    }
-
+    console.log('✅ Evento creado:', data);
     return data;
   },
 
   async update(id: number, eventData: Partial<Event>): Promise<Event> {
+    console.log('📝 Actualizando evento ID:', id, 'con datos:', eventData);
+    
+    // Hacer el UPDATE sin .single() para evitar error de 0 rows
     const { data, error } = await supabase
       .from('events')
       .update(eventData)
       .eq('id', id)
-      .select()
-      .single();
+      .select();
 
     if (error) {
-      console.error('Error updating event:', error);
+      console.error('❌ Error updating event:', error);
       throw error;
     }
 
-    return data;
+    // Verificar que devolvió datos
+    if (!data || data.length === 0) {
+      const errorMsg = `Evento con ID ${id} no encontrado`;
+      console.error('❌', errorMsg);
+      throw new Error(errorMsg);
+    }
+
+    console.log('✅ Evento actualizado:', data[0]);
+    return data[0]; // Devolver el primer elemento del array
   },
 
   async delete(id: number): Promise<void> {
@@ -387,9 +396,9 @@ export const ticketsApi = {
 
   async createDefaults(eventId: number): Promise<void> {
     const defaultTickets = [
-      { event_id: eventId, type: 'General', price: 50000, quantity: 100, available: 100, color: '#60a5fa' },
-      { event_id: eventId, type: 'VIP', price: 100000, quantity: 50, available: 50, color: '#fbbf24' },
-      { event_id: eventId, type: 'Platea', price: 75000, quantity: 75, available: 75, color: '#34d399' }
+      { event_id: eventId, type: 'General', price: 50000, quantity: 100, available: 100 },
+      { event_id: eventId, type: 'VIP', price: 100000, quantity: 50, available: 50 },
+      { event_id: eventId, type: 'Platea', price: 75000, quantity: 75, available: 75 }
     ];
 
     const { error } = await supabase
@@ -422,15 +431,18 @@ export const ticketsApi = {
       .from('tickets')
       .update(ticketData)
       .eq('id', id)
-      .select()
-      .single();
+      .select();
 
     if (error) {
       console.error('Error updating ticket:', error);
       throw error;
     }
 
-    return data;
+    if (!data || data.length === 0) {
+      throw new Error(`Ticket con ID ${id} no encontrado`);
+    }
+
+    return data[0];
   },
 
   async decreaseAvailability(id: number, quantity: number): Promise<void> {
@@ -451,6 +463,8 @@ export const ticketsApi = {
 // ============================================
 export const ordersApi = {
   async create(orderData: Omit<Order, 'id' | 'created_at'>): Promise<Order> {
+    console.log('📝 Creando orden:', orderData);
+    
     const { data, error } = await supabase
       .from('orders')
       .insert([orderData])
@@ -458,10 +472,11 @@ export const ordersApi = {
       .single();
 
     if (error) {
-      console.error('Error creating order:', error);
+      console.error('❌ Error creating order:', error);
       throw error;
     }
 
+    console.log('✅ Orden creada:', data);
     return data;
   },
 
@@ -486,10 +501,7 @@ export const ordersApi = {
   async getAll(): Promise<Order[]> {
     const { data, error } = await supabase
       .from('orders')
-      .select(`
-        *,
-        events (title, image, venue)
-      `)
+      .select('*')
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -501,40 +513,37 @@ export const ordersApi = {
   },
 
   async getById(orderId: number): Promise<Order> {
-  const { data, error } = await supabase
-    .from('orders')
-    .select(`
-      *,
-      items:order_items (
-        ticketId: ticket_id,
-        quantity
-      )
-    `)
-    .eq('id', orderId)
-    .single();
+    const { data, error } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('id', orderId)
+      .single();
 
-  if (error) {
-    console.error('Error fetching order by id:', error);
-    throw error;
-  }
+    if (error) {
+      console.error('Error fetching order by id:', error);
+      throw error;
+    }
 
-  return data;
-},
+    return data;
+  },
 
   async updateStatus(id: number, status: string): Promise<Order> {
     const { data, error } = await supabase
       .from('orders')
       .update({ status })
       .eq('id', id)
-      .select()
-      .single();
+      .select();
 
     if (error) {
       console.error('Error updating order status:', error);
       throw error;
     }
 
-    return data;
+    if (!data || data.length === 0) {
+      throw new Error(`Orden con ID ${id} no encontrada`);
+    }
+
+    return data[0];
   }
 };
 
