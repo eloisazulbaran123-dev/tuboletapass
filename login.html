@@ -484,11 +484,11 @@
           phone: phone
         });
 
-        showMessage('¡Cuenta creada! Revisa tu correo para verificar tu cuenta.', 'success');
+        showMessage('¡Usuario creado exitosamente! Ya puedes iniciar sesión.', 'success');
         
         setTimeout(() => {
           document.getElementById('showLoginLink').click();
-        }, 3000);
+        }, 2000);
 
       } catch (error) {
         showMessage(error.message || 'Error al crear la cuenta', 'error');
