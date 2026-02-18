@@ -162,39 +162,16 @@
 
   <!-- Main Content -->
   <main>
-    <!-- Featured Banner -->
-    <section class="featured-banner">
-      <div class="banner-slider" id="bannerSlider">
-        <div class="banner-slide active" style="background-image: url('https://lrfqjlfdtdnkuhrdmnez.supabase.co/storage/v1/object/public/imagenes/BANNER.PNG')">
-          <div class="banner-overlay">
-            <div class="container">
-              <span class="banner-tag">Destacado</span>
-              <h2>BLESSD | EL MEJOR HOMBRE DEL MUNDO TOUR</h2>
-              <p>El tour más esperado del año</p>
-              <button class="btn-primary" onclick="window.location.href='evento.html?id=1'">Comprar boletas</button>
-            </div>
-          </div>
-        </div>
-        <div class="banner-slide" style="background-image: url('https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=1600&h=600&fit=crop')">
-          <div class="banner-overlay">
-            <div class="container">
-              <span class="banner-tag">Concierto</span>
-              <h2>BLESSD | EL MEJOR HOMBRE DEL MUNDO TOUR</h2>
-              <button class="btn-primary" onclick="window.location.href='evento.html?id=2'">Comprar boletas</button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="banner-dots" id="bannerDots"></div>
-    </section>
+    <!-- Hero Banner se insertará aquí dinámicamente si hay un evento con show_banner=true -->
 
     <!-- Events Sections -->
     <section class="section" id="destacados">
       <div class="container">
         <div class="section-header">
-          <h2>Tuguía Carnavalera</h2>
+          <h2>Eventos Destacados</h2>
           <a href="#" class="see-all">Ver todos</a>
         </div>
+        <!-- Este grid se llenará dinámicamente con las tarjetas mejoradas -->
         <div class="events-grid" id="featuredEvents"></div>
       </div>
     </section>

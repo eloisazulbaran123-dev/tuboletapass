@@ -25,7 +25,9 @@ export interface Event {
   date_full: string;
   time: string;
   description?: string;
-  venue_map?: string; // NUEVO: Plano del evento
+  venue_map?: string;
+  show_banner?: boolean; // NUEVO: Para hero banner
+  event_date?: string; // NUEVO: Para ordenamiento cronológico
   created_at?: string;
 }
 
@@ -263,6 +265,7 @@ export const eventsApi = {
     const { data, error } = await supabase
       .from('events')
       .select('*')
+      .order('event_date', { ascending: true, nullsLast: true })
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -308,6 +311,7 @@ export const eventsApi = {
       .from('events')
       .select('*')
       .eq('category', category)
+      .order('event_date', { ascending: true, nullsLast: true })
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -316,6 +320,26 @@ export const eventsApi = {
     }
 
     return data || [];
+  },
+
+  async getBannerEvent(): Promise<Event | null> {
+    const { data, error } = await supabase
+      .from('events')
+      .select('*')
+      .eq('show_banner', true)
+      .limit(1)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        // No hay evento con banner activo
+        return null;
+      }
+      console.error('Error fetching banner event:', error);
+      return null;
+    }
+
+    return data;
   },
 
   async create(eventData: Omit<Event, 'id' | 'created_at'>): Promise<Event> {

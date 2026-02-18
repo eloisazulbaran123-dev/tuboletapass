@@ -313,6 +313,26 @@
   </small>
 </div>
 
+<!-- NUEVO CAMPO: FECHA DEL EVENTO -->
+<div class="form-group">
+  <label>Fecha del Evento</label>
+  <input type="date" id="event_date" required>
+  <small style="color:var(--text-light);font-size:0.8rem;display:block;margin-top:0.25rem;">
+    Fecha real del evento para ordenamiento cronológico
+  </small>
+</div>
+
+<!-- NUEVO CAMPO: MOSTRAR COMO BANNER -->
+<div class="form-group">
+  <label style="display:flex;align-items:center;gap:0.75rem;cursor:pointer;">
+    <input type="checkbox" id="show_banner" style="width:auto;height:20px;cursor:pointer;">
+    <span>Mostrar como Hero Banner en la página principal</span>
+  </label>
+  <small style="color:#f59e0b;font-size:0.8rem;display:block;margin-top:0.5rem;padding-left:2rem;">
+    ⚠️ Solo debe haber un evento con banner activo. Si activas este, los demás se desactivarán automáticamente.
+  </small>
+</div>
+
 <!-- LOCALIDADES -->
 
 <div class="form-group">
@@ -649,6 +669,8 @@ async function updateOrderStatus(orderId, status) {
         document.getElementById('time').value = event.time;
         document.getElementById('description').value = event.description || '';
         document.getElementById('venue_map').value = event.venue_map || '';
+        document.getElementById('event_date').value = event.event_date || '';
+        document.getElementById('show_banner').checked = event.show_banner || false;
       } else {
         document.getElementById('modalTitle').textContent = 'Nuevo Evento';
         document.getElementById('eventForm').reset();
@@ -693,7 +715,9 @@ async function updateOrderStatus(orderId, status) {
   const date_full = document.getElementById('date_full').value.trim();
   const time = document.getElementById('time').value.trim();
   const description = document.getElementById('description').value.trim();
-  const venue_map = document.getElementById('venue_map').value.trim(); // NUEVO CAMPO
+  const venue_map = document.getElementById('venue_map').value.trim();
+  const event_date = document.getElementById('event_date').value;
+  const show_banner = document.getElementById('show_banner').checked;
 
   // Validación de campos obligatorios
   if (!title) {
@@ -713,6 +737,11 @@ async function updateOrderStatus(orderId, status) {
 
   if (!date_day || !date_month || !date_full || !time) {
     showToast('Por favor completa todos los campos de fecha y hora', 'error');
+    return;
+  }
+
+  if (!event_date) {
+    showToast('Por favor selecciona la fecha del evento', 'error');
     return;
   }
 
@@ -742,11 +771,27 @@ async function updateOrderStatus(orderId, status) {
     date_full,
     time,
     description,
-    venue_map: venue_map || null // INCLUIR PLANO DEL EVENTO
+    venue_map: venue_map || null,
+    event_date: event_date || null,
+    show_banner: show_banner || false
   };
 
   try {
     console.log('💾 Guardando evento...', eventData);
+
+    // SI SE ACTIVÓ EL BANNER, DESACTIVAR LOS DEMÁS
+    if (show_banner) {
+      console.log('🎯 Desactivando otros banners...');
+      
+      const allEventsData = await eventsApi.getAll();
+      
+      for (const evt of allEventsData) {
+        if (evt.show_banner && evt.id !== editingEventId) {
+          await eventsApi.update(evt.id, { show_banner: false });
+          console.log(`✅ Banner desactivado en evento ID: ${evt.id}`);
+        }
+      }
+    }
 
     if (editingEventId) {
       // ACTUALIZAR evento existente
