@@ -329,13 +329,21 @@
       const ticket = cartItem.ticket;
       const date = cartItem.date;
       
+      // Construir la fecha de forma segura
+      let dateDisplay = '';
+      if (date && date.event_date) {
+        dateDisplay = `${date.event_date} - ${date.event_time}`;
+      } else if (event.date_full) {
+        dateDisplay = `${event.date_full} - ${event.time}`;
+      }
+      
       container.innerHTML = `
         <div class="order-item">
           <img src="${event.image}" alt="${event.title}" />
           <div class="order-item-info" style="flex: 1;">
             <h4>${event.title}</h4>
             <p>${event.venue}, ${event.city}</p>
-            <p>${date ? `${date.event_date} - ${date.event_time}` : `${event.date_full} - ${event.time}`}</p>
+            <p>${dateDisplay}</p>
             <p style="color:var(--cyan);font-weight:600;">${ticket.type}</p>
             <p style="margin-top: 0.5rem;">Cantidad: ${cartItem.quantity}</p>
           </div>
