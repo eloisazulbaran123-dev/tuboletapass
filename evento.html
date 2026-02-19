@@ -12,8 +12,8 @@
     .event-header .container { display: flex; align-items: center; justify-content: space-between; }
     .back-btn { display: flex; align-items: center; gap: 0.5rem; color: var(--white); font-weight: 500; text-decoration: none; }
     .back-btn:hover { color: var(--cyan); }
-    .event-hero { position: relative; height: 300px; overflow: hidden; }
-    .event-hero img { width: 100%; height: 100%; object-fit: cover; }
+    .event-hero { position: relative; height: 400px; overflow: hidden; background: #1a1a1a; }
+    .event-hero img { width: 100%; height: 100%; object-fit: contain; }
     .event-details { padding: 2rem 0; }
     .event-grid { display: grid; grid-template-columns: 1fr; gap: 2rem; }
     .event-info h1 { font-size: 1.75rem; font-weight: 800; color: var(--blue); margin-bottom: 1rem; }
@@ -110,7 +110,7 @@
     
     @media (min-width: 768px) {
       .event-grid { grid-template-columns: 1fr 420px; }
-      .event-hero { height: 400px; }
+      .event-hero { height: 500px; }
       .event-info h1 { font-size: 2.25rem; }
     }
     
@@ -387,11 +387,14 @@
     };
 
     async function loadTicketsByDate(dateId) {
+      // Las localidades son las mismas para todas las fechas
+      // Solo cargamos por evento, no por fecha específica
       try {
-        tickets = await ticketsApi.getByEventDateId(dateId);
+        tickets = await ticketsApi.getByEventId(eventId);
+        console.log('Localidades cargadas:', tickets);
         renderTickets();
       } catch (error) {
-        console.error('Error cargando tickets por fecha:', error);
+        console.error('Error cargando tickets:', error);
       }
     }
 
