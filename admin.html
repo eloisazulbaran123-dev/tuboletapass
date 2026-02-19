@@ -890,10 +890,23 @@ async function updateOrderStatus(orderId, status) {
         document.getElementById('venue_map').value = event.venue_map || '';
         document.getElementById('event_date').value = event.event_date || '';
         document.getElementById('show_banner').checked = event.show_banner || false;
-        document.getElementById('has_discount').checked = event.has_discount || false;
-        document.getElementById('discount_type').value = event.discount_type || 'percentage';
-        document.getElementById('discount_value').value = event.discount_value || 0;
-        toggleDiscountFields();
+        
+        // Cargar descuentos con verificación de existencia
+        try {
+          const hasDiscountEl = document.getElementById('has_discount');
+          const discountTypeEl = document.getElementById('discount_type');
+          const discountValueEl = document.getElementById('discount_value');
+          
+          if (hasDiscountEl) hasDiscountEl.checked = event.has_discount || false;
+          if (discountTypeEl) discountTypeEl.value = event.discount_type || 'percentage';
+          if (discountValueEl) discountValueEl.value = event.discount_value || 0;
+          
+          if (typeof window.toggleDiscountFields === 'function') {
+            window.toggleDiscountFields();
+          }
+        } catch (error) {
+          console.log('Campos de descuento no disponibles:', error);
+        }
       } else {
         document.getElementById('modalTitle').textContent = 'Nuevo Evento';
         document.getElementById('eventForm').reset();
