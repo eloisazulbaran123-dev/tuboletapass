@@ -505,20 +505,39 @@ async function saveEventDates(eventId) {
   // Importar eventDatesApi
   const { eventDatesApi } = await import('/src/supabase.ts');
   
-  for (const date of eventDates) {
-    if (!date.db_id) {
-      // Crear nueva fecha
-      try {
-        await eventDatesApi.create({
-          event_id: eventId,
-          event_date: date.event_date,
-          event_time: date.event_time,
-          is_active: true
-        });
-        console.log('✅ Fecha guardada:', date.event_date, date.event_time);
-      } catch (error) {
-        console.error('Error guardando fecha:', error);
+  // Primero, eliminar fechas existentes del evento (solo en modo edición)
+  if (editingEventId) {
+    try {
+      const { data: existingDates } = await supabase
+        .from('event_dates')
+        .select('id')
+        .eq('event_id', eventId);
+      
+      if (existingDates && existingDates.length > 0) {
+        await supabase
+          .from('event_dates')
+          .delete()
+          .eq('event_id', eventId);
+        console.log('🗑️ Fechas anteriores eliminadas');
       }
+    } catch (error) {
+      console.error('Error eliminando fechas anteriores:', error);
+    }
+  }
+  
+  // Ahora crear las nuevas fechas
+  for (const date of eventDates) {
+    try {
+      await eventDatesApi.create({
+        event_id: eventId,
+        event_date: date.event_date,
+        event_time: date.event_time,
+        is_active: true
+      });
+      console.log('✅ Fecha guardada:', date.event_date, date.event_time);
+    } catch (error) {
+      console.error('Error guardando fecha:', error);
+      // Continuar con las demás fechas aunque una falle
     }
   }
 }

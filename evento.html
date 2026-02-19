@@ -509,7 +509,20 @@
     }
 
     window.proceedToBuy = function() {
-      if (!selectedTicket || quantity === 0) return;
+      console.log('🛒 Intentando comprar...');
+      console.log('Ticket seleccionado:', selectedTicket);
+      console.log('Cantidad:', quantity);
+      console.log('Evento:', event);
+      
+      if (!selectedTicket) {
+        alert('Por favor selecciona una localidad primero');
+        return;
+      }
+      
+      if (quantity === 0) {
+        alert('La cantidad debe ser mayor a 0');
+        return;
+      }
 
       const purchaseData = {
         event: event,
@@ -520,8 +533,17 @@
         subtotal: (selectedTicket.final_price || selectedTicket.price) * quantity
       };
 
-      localStorage.setItem('purchase', JSON.stringify(purchaseData));
-      window.location.href = '/checkout.html';
+      console.log('💾 Guardando en localStorage:', purchaseData);
+      
+      try {
+        localStorage.setItem('purchase', JSON.stringify(purchaseData));
+        console.log('✅ Guardado exitoso');
+        console.log('📦 Verificación:', localStorage.getItem('purchase'));
+        window.location.href = '/checkout.html';
+      } catch (error) {
+        console.error('❌ Error guardando en localStorage:', error);
+        alert('Error al procesar la compra. Por favor intenta de nuevo.');
+      }
     };
 
     window.openMapModal = function() {
