@@ -368,189 +368,6 @@
     <!-- Las fechas se agregarán aquí -->
   </div>
 </div>
-```
-
-## JAVASCRIPT A AGREGAR
-
-Agregar antes de la función `saveEvent`:
-
-```javascript
-// ============================================
-// GESTIÓN DE DESCUENTOS
-// ============================================
-
-window.toggleDiscountFields = function() {
-  const hasDiscount = document.getElementById('has_discount').checked;
-  document.getElementById('discount-fields').style.display = hasDiscount ? 'block' : 'none';
-};
-
-// ============================================
-// GESTIÓN DE FECHAS
-// ============================================
-
-let eventDates = [];
-let dateIdCounter = 1;
-
-window.addEventDate = function() {
-  const id = `date_${dateIdCounter++}`;
-  eventDates.push({
-    id,
-    event_date: '',
-    event_time: ''
-  });
-  renderEventDates();
-};
-
-window.removeEventDate = function(id) {
-  eventDates = eventDates.filter(d => d.id !== id);
-  renderEventDates();
-};
-
-function renderEventDates() {
-  const container = document.getElementById('eventDates');
-  
-  if (eventDates.length === 0) {
-    container.innerHTML = `
-      <p style="color:#666;font-size:0.9rem;text-align:center;padding:1rem;background:#f8f9fa;border-radius:8px;">
-        No hay fechas agregadas. Agrega al menos una fecha para el evento.
-      </p>
-    `;
-    return;
-  }
-
-  container.innerHTML = eventDates.map(date => `
-    <div style="display:flex;gap:1rem;align-items:end;padding:1rem;background:#f8f9fa;border-radius:8px;">
-      <div style="flex:1;">
-        <label style="font-size:0.85rem;color:var(--blue);font-weight:600;margin-bottom:0.5rem;display:block;">Fecha</label>
-        <input 
-          type="date" 
-          value="${date.event_date}" 
-          onchange="updateEventDate('${date.id}', 'event_date', this.value)"
-          style="width:100%;padding:0.75rem;border:2px solid var(--border);border-radius:8px;"
-          required
-        >
-      </div>
-      <div style="flex:1;">
-        <label style="font-size:0.85rem;color:var(--blue);font-weight:600;margin-bottom:0.5rem;display:block;">Hora</label>
-        <input 
-          type="text" 
-          value="${date.event_time}" 
-          placeholder="7:00 PM"
-          onchange="updateEventDate('${date.id}', 'event_time', this.value)"
-          style="width:100%;padding:0.75rem;border:2px solid var(--border);border-radius:8px;"
-          required
-        >
-      </div>
-      <button 
-        type="button" 
-        onclick="removeEventDate('${date.id}')"
-        style="padding:0.75rem 1rem;background:#ef4444;color:white;border:none;border-radius:8px;cursor:pointer;height:fit-content;"
-      >
-        🗑️
-      </button>
-    </div>
-  `).join('');
-}
-
-window.updateEventDate = function(id, field, value) {
-  const date = eventDates.find(d => d.id === id);
-  if (date) {
-    date[field] = value;
-  }
-};
-
-// ============================================
-// GESTIÓN DE DESCUENTOS POR LOCALIDAD
-// ============================================
-
-// Actualizar la función addTicketType existente
-// Agregar campos de descuento a cada localidad
-
-// Actualizar renderTicketTypes para incluir campos de descuento
-function renderTicketTypesWithDiscounts() {
-  const container = document.getElementById('ticketTypes');
-  
-  container.innerHTML = ticketTypes.map(ticket => {
-    // Pre-calcular valores para evitar problemas de sintaxis
-    const hasDiscountChecked = ticket.has_discount ? 'checked' : '';
-    const discountType = ticket.discount_type || 'percentage';
-    const discountValue = ticket.discount_value || 0;
-    const isPercentage = discountType === 'percentage' ? 'selected' : '';
-    const isFixed = discountType === 'fixed' ? 'selected' : '';
-    
-    return `
-      <div style="border:2px solid var(--border);border-radius:10px;padding:1rem;">
-        <div style="display:flex;gap:1rem;margin-bottom:0.75rem;">
-          <input 
-            type="text" 
-            value="${ticket.type}" 
-            placeholder="Nombre (ej: VIP)"
-            onchange="updateTicket('${ticket.id}', 'type', this.value)"
-            style="flex:1;padding:0.75rem;border:2px solid var(--border);border-radius:8px;"
-          >
-          <input 
-            type="number" 
-            value="${ticket.price}" 
-            placeholder="Precio"
-            onchange="updateTicket('${ticket.id}', 'price', this.value)"
-            style="flex:1;padding:0.75rem;border:2px solid var(--border);border-radius:8px;"
-          >
-          <input 
-            type="number" 
-            value="${ticket.quantity}" 
-            placeholder="Cantidad"
-            onchange="updateTicket('${ticket.id}', 'quantity', this.value)"
-            style="flex:1;padding:0.75rem;border:2px solid var(--border);border-radius:8px;"
-          >
-          <button 
-            type="button"
-            onclick="removeTicket('${ticket.id}')"
-            style="padding:0.75rem 1rem;background:#ef4444;color:white;border:none;border-radius:8px;"
-          >
-            🗑️
-          </button>
-        </div>
-        
-        <div style="background:#f8f9fa;padding:0.75rem;border-radius:8px;">
-          <label style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;cursor:pointer;">
-            <input 
-              type="checkbox" 
-              ${hasDiscountChecked}
-              onchange="updateTicketDiscount('${ticket.id}', this.checked)"
-              style="width:auto;"
-            >
-            <span style="font-size:0.85rem;">Descuento en esta localidad</span>
-          </label>
-          
-          ${ticket.has_discount ? `
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-top:0.5rem;">
-              <select 
-                onchange="updateTicket('${ticket.id}', 'discount_type', this.value)"
-                style="padding:0.5rem;border:1px solid var(--border);border-radius:6px;"
-              >
-                <option value="percentage" ${isPercentage}>%</option>
-                <option value="fixed" ${isFixed}>$</option>
-              </select>
-              <input 
-                type="number" 
-                value="${discountValue}" 
-                placeholder="Valor"
-                onchange="updateTicket('${ticket.id}', 'discount_value', parseFloat(this.value))"
-                style="padding:0.5rem;border:1px solid var(--border);border-radius:6px;"
-              >
-            </div>
-          ` : ''}
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-// Helper para manejar cambio de descuento
-window.updateTicketDiscount = function(id, hasDiscount) {
-  updateTicket(id, 'has_discount', hasDiscount);
-  renderTicketTypesWithDiscounts();
-};
 
 <!-- LOCALIDADES -->
 
@@ -676,6 +493,88 @@ async function saveEventTickets(eventId) {
     }
   }
 }
+
+// ============================================
+// GESTIÓN DE DESCUENTOS
+// ============================================
+window.toggleDiscountFields = function() {
+  const hasDiscount = document.getElementById('has_discount');
+  const discountFields = document.getElementById('discount-fields');
+  if (hasDiscount && discountFields) {
+    discountFields.style.display = hasDiscount.checked ? 'block' : 'none';
+  }
+};
+
+// ============================================
+// GESTIÓN DE FECHAS MÚLTIPLES
+// ============================================
+let eventDates = [];
+let dateIdCounter = 1;
+
+window.addEventDate = function() {
+  const id = `date_${dateIdCounter++}`;
+  eventDates.push({
+    id,
+    event_date: '',
+    event_time: ''
+  });
+  renderEventDates();
+};
+
+window.removeEventDate = function(id) {
+  eventDates = eventDates.filter(d => d.id !== id);
+  renderEventDates();
+};
+
+function renderEventDates() {
+  const container = document.getElementById('eventDates');
+  if (!container) return;
+  
+  if (eventDates.length === 0) {
+    container.innerHTML = '<p style="color:#666;font-size:0.9rem;text-align:center;padding:1rem;background:#f8f9fa;border-radius:8px;">No hay fechas agregadas. Agrega al menos una fecha para el evento.</p>';
+    return;
+  }
+
+  container.innerHTML = eventDates.map(date => `
+    <div style="display:flex;gap:1rem;align-items:end;padding:1rem;background:#f8f9fa;border-radius:8px;">
+      <div style="flex:1;">
+        <label style="font-size:0.85rem;color:var(--blue);font-weight:600;margin-bottom:0.5rem;display:block;">Fecha</label>
+        <input 
+          type="date" 
+          value="${date.event_date}" 
+          onchange="updateEventDate('${date.id}', 'event_date', this.value)"
+          style="width:100%;padding:0.75rem;border:2px solid var(--border);border-radius:8px;"
+          required
+        >
+      </div>
+      <div style="flex:1;">
+        <label style="font-size:0.85rem;color:var(--blue);font-weight:600;margin-bottom:0.5rem;display:block;">Hora</label>
+        <input 
+          type="text" 
+          value="${date.event_time}" 
+          placeholder="7:00 PM"
+          onchange="updateEventDate('${date.id}', 'event_time', this.value)"
+          style="width:100%;padding:0.75rem;border:2px solid var(--border);border-radius:8px;"
+          required
+        >
+      </div>
+      <button 
+        type="button" 
+        onclick="removeEventDate('${date.id}')"
+        style="padding:0.75rem 1rem;background:#ef4444;color:white;border:none;border-radius:8px;cursor:pointer;height:fit-content;"
+      >
+        🗑️
+      </button>
+    </div>
+  `).join('');
+}
+
+window.updateEventDate = function(id, field, value) {
+  const date = eventDates.find(d => d.id === id);
+  if (date) {
+    date[field] = value;
+  }
+};
     // ===== ÓRDENES DESDE SUPABASE =====
 async function loadOrders() {
   const list = document.getElementById('ordersList');
@@ -861,14 +760,16 @@ async function updateOrderStatus(orderId, status) {
     window.openEventModal = function(eventId = null) {
       ticketTypes = [];
       ticketIdCounter = 1;
+      eventDates = [];
+      dateIdCounter = 1;
       editingEventId = eventId;
       const modal = document.getElementById('eventModal');
       
       if (eventId) {
         loadEventTickets(eventId);
-        } else {
-          renderTicketTypes();
-          }
+      } else {
+        renderTicketTypes();
+      }
 
       if (eventId) {
         const event = allEvents.find(e => e.id === eventId);
@@ -907,10 +808,14 @@ async function updateOrderStatus(orderId, status) {
         } catch (error) {
           console.log('Campos de descuento no disponibles:', error);
         }
+        
+        // Renderizar fechas vacías
+        renderEventDates();
       } else {
         document.getElementById('modalTitle').textContent = 'Nuevo Evento';
         document.getElementById('eventForm').reset();
         document.getElementById('eventId').value = '';
+        renderEventDates();
       }
       
       modal.classList.add('active');
