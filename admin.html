@@ -495,6 +495,35 @@ async function saveEventTickets(eventId) {
 }
 
 // ============================================
+// GUARDAR FECHAS DEL EVENTO
+// ============================================
+async function saveEventDates(eventId) {
+  if (eventDates.length === 0) return;
+  
+  console.log('💾 Guardando fechas:', eventDates);
+
+  // Importar eventDatesApi
+  const { eventDatesApi } = await import('/src/supabase.ts');
+  
+  for (const date of eventDates) {
+    if (!date.db_id) {
+      // Crear nueva fecha
+      try {
+        await eventDatesApi.create({
+          event_id: eventId,
+          event_date: date.event_date,
+          event_time: date.event_time,
+          is_active: true
+        });
+        console.log('✅ Fecha guardada:', date.event_date, date.event_time);
+      } catch (error) {
+        console.error('Error guardando fecha:', error);
+      }
+    }
+  }
+}
+
+// ============================================
 // GESTIÓN DE DESCUENTOS
 // ============================================
 window.toggleDiscountFields = function() {
@@ -901,6 +930,19 @@ async function updateOrderStatus(orderId, status) {
       return;
     }
   }
+  
+  // Validar fechas
+  if (eventDates.length === 0) {
+    showToast('Por favor agrega al menos una fecha para el evento', 'error');
+    return;
+  }
+  
+  for (const date of eventDates) {
+    if (!date.event_date || !date.event_time) {
+      showToast('Por favor completa todos los campos de las fechas', 'error');
+      return;
+    }
+  }
 
   // Preparar datos del evento
   const eventData = {
@@ -946,6 +988,7 @@ async function updateOrderStatus(orderId, status) {
       console.log('✅ Evento actualizado:', updatedEvent);
       
       await saveEventTickets(editingEventId);
+      await saveEventDates(editingEventId);
       showToast('Evento actualizado exitosamente', 'success');
     } else {
       // CREAR nuevo evento
@@ -953,6 +996,7 @@ async function updateOrderStatus(orderId, status) {
       console.log('✅ Evento creado:', newEvent);
       
       await saveEventTickets(newEvent.id);
+      await saveEventDates(newEvent.id);
       showToast('Evento creado exitosamente', 'success');
     }
 
