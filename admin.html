@@ -470,136 +470,87 @@ window.updateEventDate = function(id, field, value) {
 function renderTicketTypesWithDiscounts() {
   const container = document.getElementById('ticketTypes');
   
-  container.innerHTML = ticketTypes.map(ticket => `
-    <div style="border:2px solid var(--border);border-radius:10px;padding:1rem;">
-      <div style="display:flex;gap:1rem;margin-bottom:0.75rem;">
-        <input 
-          type="text" 
-          value="${ticket.type}" 
-          placeholder="Nombre (ej: VIP)"
-          onchange="updateTicket('${ticket.id}', 'type', this.value)"
-          style="flex:1;padding:0.75rem;border:2px solid var(--border);border-radius:8px;"
-        >
-        <input 
-          type="number" 
-          value="${ticket.price}" 
-          placeholder="Precio"
-          onchange="updateTicket('${ticket.id}', 'price', this.value)"
-          style="flex:1;padding:0.75rem;border:2px solid var(--border);border-radius:8px;"
-        >
-        <input 
-          type="number" 
-          value="${ticket.quantity}" 
-          placeholder="Cantidad"
-          onchange="updateTicket('${ticket.id}', 'quantity', this.value)"
-          style="flex:1;padding:0.75rem;border:2px solid var(--border);border-radius:8px;"
-        >
-        <button 
-          onclick="removeTicket('${ticket.id}')"
-          style="padding:0.75rem 1rem;background:#ef4444;color:white;border:none;border-radius:8px;"
-        >
-          🗑️
-        </button>
-      </div>
-      
-      <!-- Descuento por localidad -->
-      <div style="background:#f8f9fa;padding:0.75rem;border-radius:8px;">
-        <label style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;cursor:pointer;">
+  container.innerHTML = ticketTypes.map(ticket => {
+    // Pre-calcular valores para evitar problemas de sintaxis
+    const hasDiscountChecked = ticket.has_discount ? 'checked' : '';
+    const discountType = ticket.discount_type || 'percentage';
+    const discountValue = ticket.discount_value || 0;
+    const isPercentage = discountType === 'percentage' ? 'selected' : '';
+    const isFixed = discountType === 'fixed' ? 'selected' : '';
+    
+    return `
+      <div style="border:2px solid var(--border);border-radius:10px;padding:1rem;">
+        <div style="display:flex;gap:1rem;margin-bottom:0.75rem;">
           <input 
-            type="checkbox" 
-            ${ticket.has_discount ? 'checked' : ''}
-            onchange="updateTicket('${ticket.id}', 'has_discount', this.checked)"
-            style="width:auto;"
+            type="text" 
+            value="${ticket.type}" 
+            placeholder="Nombre (ej: VIP)"
+            onchange="updateTicket('${ticket.id}', 'type', this.value)"
+            style="flex:1;padding:0.75rem;border:2px solid var(--border);border-radius:8px;"
           >
-          <span style="font-size:0.85rem;">Descuento en esta localidad</span>
-        </label>
+          <input 
+            type="number" 
+            value="${ticket.price}" 
+            placeholder="Precio"
+            onchange="updateTicket('${ticket.id}', 'price', this.value)"
+            style="flex:1;padding:0.75rem;border:2px solid var(--border);border-radius:8px;"
+          >
+          <input 
+            type="number" 
+            value="${ticket.quantity}" 
+            placeholder="Cantidad"
+            onchange="updateTicket('${ticket.id}', 'quantity', this.value)"
+            style="flex:1;padding:0.75rem;border:2px solid var(--border);border-radius:8px;"
+          >
+          <button 
+            type="button"
+            onclick="removeTicket('${ticket.id}')"
+            style="padding:0.75rem 1rem;background:#ef4444;color:white;border:none;border-radius:8px;"
+          >
+            🗑️
+          </button>
+        </div>
         
-        ${ticket.has_discount ? `
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-top:0.5rem;">
-            <select 
-              onchange="updateTicket('${ticket.id}', 'discount_type', this.value)"
-              style="padding:0.5rem;border:1px solid var(--border);border-radius:6px;"
-            >
-              <option value="percentage" ${ticket.discount_type === 'percentage' ? 'selected' : ''}>%</option>
-              <option value="fixed" ${ticket.discount_type === 'fixed' ? 'selected' : ''}>$</option>
-            </select>
+        <div style="background:#f8f9fa;padding:0.75rem;border-radius:8px;">
+          <label style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;cursor:pointer;">
             <input 
-              type="number" 
-              value="${ticket.discount_value || 0}" 
-              placeholder="Valor"
-              onchange="updateTicket('${ticket.id}', 'discount_value', parseFloat(this.value))"
-              style="padding:0.5rem;border:1px solid var(--border);border-radius:6px;"
+              type="checkbox" 
+              ${hasDiscountChecked}
+              onchange="updateTicketDiscount('${ticket.id}', this.checked)"
+              style="width:auto;"
             >
-          </div>
-        ` : ''}
+            <span style="font-size:0.85rem;">Descuento en esta localidad</span>
+          </label>
+          
+          ${ticket.has_discount ? `
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-top:0.5rem;">
+              <select 
+                onchange="updateTicket('${ticket.id}', 'discount_type', this.value)"
+                style="padding:0.5rem;border:1px solid var(--border);border-radius:6px;"
+              >
+                <option value="percentage" ${isPercentage}>%</option>
+                <option value="fixed" ${isFixed}>$</option>
+              </select>
+              <input 
+                type="number" 
+                value="${discountValue}" 
+                placeholder="Valor"
+                onchange="updateTicket('${ticket.id}', 'discount_value', parseFloat(this.value))"
+                style="padding:0.5rem;border:1px solid var(--border);border-radius:6px;"
+              >
+            </div>
+          ` : ''}
+        </div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
-// ============================================
-// ACTUALIZAR openEventModal
-// ============================================
-
-// Agregar en openEventModal cuando se carga un evento existente:
-
-```javascript
-// Cargar descuentos
-document.getElementById('has_discount').checked = event.has_discount || false;
-document.getElementById('discount_type').value = event.discount_type || 'percentage';
-document.getElementById('discount_value').value = event.discount_value || 0;
-toggleDiscountFields();
-
-// Cargar fechas del evento
-if (event.id) {
-  const dates = await eventDatesApi.getByEventId(event.id);
-  eventDates = dates.map((d, i) => ({
-    id: `date_${i + 1}`,
-    event_date: d.event_date,
-    event_time: d.event_time,
-    db_id: d.id
-  }));
-  renderEventDates();
-}
-```
-
-## ACTUALIZAR saveEvent
-
-Agregar captura de valores:
-
-```javascript
-const has_discount = document.getElementById('has_discount').checked;
-const discount_type = document.getElementById('discount_type').value;
-const discount_value = parseFloat(document.getElementById('discount_value').value) || 0;
-
-// Validar fechas
-if (eventDates.length === 0) {
-  showToast('Por favor agrega al menos una fecha', 'error');
-  return;
-}
-
-// Agregar a eventData
-const eventData = {
-  // ... campos existentes
-  has_discount,
-  discount_type: has_discount ? discount_type : null,
-  discount_value: has_discount ? discount_value : null
+// Helper para manejar cambio de descuento
+window.updateTicketDiscount = function(id, hasDiscount) {
+  updateTicket(id, 'has_discount', hasDiscount);
+  renderTicketTypesWithDiscounts();
 };
-
-// Después de guardar el evento, guardar las fechas
-if (event.id) {
-  // Guardar fechas
-  for (const date of eventDates) {
-    if (!date.db_id) {
-      await eventDatesApi.create({
-        event_id: event.id,
-        event_date: date.event_date,
-        event_time: date.event_time,
-        is_active: true
-      });
-    }
-  }
-}
 
 <!-- LOCALIDADES -->
 
