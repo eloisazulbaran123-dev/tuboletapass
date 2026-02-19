@@ -26,18 +26,35 @@ export interface Event {
   time: string;
   description?: string;
   venue_map?: string;
-  show_banner?: boolean; // NUEVO: Para hero banner
-  event_date?: string; // NUEVO: Para ordenamiento cronológico
+  show_banner?: boolean;
+  event_date?: string;
+  has_discount?: boolean;
+  discount_type?: 'percentage' | 'fixed';
+  discount_value?: number;
+  created_at?: string;
+}
+
+export interface EventDate {
+  id: number;
+  event_id: number;
+  event_date: string;
+  event_time: string;
+  is_active: boolean;
   created_at?: string;
 }
 
 export interface Ticket {
   id: number;
   event_id: number;
+  event_date_id?: number;
   type: string;
   price: number;
   quantity: number;
   available: number;
+  has_discount?: boolean;
+  discount_type?: 'percentage' | 'fixed';
+  discount_value?: number;
+  final_price?: number;
   created_at?: string;
 }
 
@@ -77,7 +94,6 @@ interface AdminUser {
 // AUTENTICACIÓN (UNIFICADA)
 // ============================================
 export const auth = {
-  // Obtener usuario actual (normalizado)
   async getUser(): Promise<{
     id: string;
     email: string;
@@ -101,12 +117,10 @@ export const auth = {
     };
   },
 
-  // Alias para compatibilidad con código de clientes
   async getUserData() {
     return this.getUser();
   },
 
-  // Obtener sesión actual (normalizada)
   async getSession(): Promise<{
     access_token: string;
     user: {
@@ -136,7 +150,6 @@ export const auth = {
     };
   },
 
-  // Login con email y contraseña (para admin - con verificación)
   async signInAdmin(email: string, password: string): Promise<{ user: any; error: any }> {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -147,7 +160,6 @@ export const auth = {
       return { user: null, error };
     }
 
-    // Verificar que el usuario sea admin
     const normalizedUser = data.user
       ? {
           id: data.user.id,
@@ -169,7 +181,6 @@ export const auth = {
     return { user: data.user ?? null, error: null };
   },
 
-  // Login simple para clientes (sin verificación de admin)
   async signIn(email: string, password: string): Promise<any> {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -179,7 +190,6 @@ export const auth = {
     return data;
   },
 
-  // Registro de nuevo usuario
   async signUp(email: string, password: string, metadata?: any): Promise<any> {
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -192,12 +202,10 @@ export const auth = {
     return data;
   },
 
-  // Cerrar sesión
   async signOut(): Promise<void> {
     await supabase.auth.signOut();
   },
 
-  // Restablecer contraseña
   async resetPassword(email: string): Promise<any> {
     const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password.html`
@@ -206,14 +214,12 @@ export const auth = {
     return data;
   },
 
-  // Escuchar cambios en autenticación
   onAuthStateChange(callback: (event: string, session: any) => void) {
     return supabase.auth.onAuthStateChange((event, session) => {
       callback(event, session);
     });
   },
 
-  // Verificar si es admin
   async isAdmin(user?: User | null): Promise<boolean> {
     const currentUser = user || await this.getUser();
     if (!currentUser) return false;
@@ -237,7 +243,6 @@ export const auth = {
     }
   },
 
-  // Obtener datos del admin
   async getAdminData(): Promise<AdminUser | null> {
     const user = await this.getUser();
     if (!user) return null;
@@ -296,6 +301,7 @@ export const eventsApi = {
       .from('events')
       .select('*')
       .eq('city', city)
+      .order('event_date', { ascending: true, nullsLast: true })
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -332,7 +338,6 @@ export const eventsApi = {
 
     if (error) {
       if (error.code === 'PGRST116') {
-        // No hay evento con banner activo
         return null;
       }
       console.error('Error fetching banner event:', error);
@@ -363,7 +368,6 @@ export const eventsApi = {
   async update(id: number, eventData: Partial<Event>): Promise<Event> {
     console.log('📝 Actualizando evento ID:', id, 'con datos:', eventData);
     
-    // Hacer el UPDATE sin .single() para evitar error de 0 rows
     const { data, error } = await supabase
       .from('events')
       .update(eventData)
@@ -375,7 +379,6 @@ export const eventsApi = {
       throw error;
     }
 
-    // Verificar que devolvió datos
     if (!data || data.length === 0) {
       const errorMsg = `Evento con ID ${id} no encontrado`;
       console.error('❌', errorMsg);
@@ -383,7 +386,7 @@ export const eventsApi = {
     }
 
     console.log('✅ Evento actualizado:', data[0]);
-    return data[0]; // Devolver el primer elemento del array
+    return data[0];
   },
 
   async delete(id: number): Promise<void> {
@@ -394,6 +397,54 @@ export const eventsApi = {
 
     if (error) {
       console.error('Error deleting event:', error);
+      throw error;
+    }
+  }
+};
+
+// ============================================
+// EVENT DATES API
+// ============================================
+export const eventDatesApi = {
+  async getByEventId(eventId: number): Promise<EventDate[]> {
+    const { data, error } = await supabase
+      .from('event_dates')
+      .select('*')
+      .eq('event_id', eventId)
+      .eq('is_active', true)
+      .order('event_date', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching event dates:', error);
+      return [];
+    }
+
+    return data || [];
+  },
+
+  async create(eventDateData: Omit<EventDate, 'id' | 'created_at'>): Promise<EventDate> {
+    const { data, error } = await supabase
+      .from('event_dates')
+      .insert([eventDateData])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating event date:', error);
+      throw error;
+    }
+
+    return data;
+  },
+
+  async delete(id: number): Promise<void> {
+    const { error } = await supabase
+      .from('event_dates')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error deleting event date:', error);
       throw error;
     }
   }
@@ -412,6 +463,21 @@ export const ticketsApi = {
 
     if (error) {
       console.error('Error fetching tickets:', error);
+      return [];
+    }
+
+    return data || [];
+  },
+
+  async getByEventDateId(eventDateId: number): Promise<Ticket[]> {
+    const { data, error } = await supabase
+      .from('tickets')
+      .select('*')
+      .eq('event_date_id', eventDateId)
+      .order('price', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching tickets by date:', error);
       return [];
     }
 
@@ -600,139 +666,10 @@ export function formatDateTime(dateString: string): string {
     minute: '2-digit'
   });
 }
-/* =====================================================
-   AGREGAR ESTAS INTERFACES Y FUNCIONES A supabase.ts
-   ===================================================== */
 
 // ============================================
-// NUEVAS INTERFACES
+// DISCOUNT HELPERS
 // ============================================
-
-export interface EventDate {
-  id: number;
-  event_id: number;
-  event_date: string;
-  event_time: string;
-  is_active: boolean;
-  created_at?: string;
-}
-
-// Actualizar interface Ticket existente para incluir descuentos
-export interface Ticket {
-  id: number;
-  event_id: number;
-  event_date_id?: number; // NUEVO
-  type: string;
-  price: number;
-  quantity: number;
-  available: number;
-  has_discount?: boolean; // NUEVO
-  discount_type?: 'percentage' | 'fixed'; // NUEVO
-  discount_value?: number; // NUEVO
-  final_price?: number; // NUEVO (calculado automáticamente)
-  created_at?: string;
-}
-
-// Actualizar interface Event existente
-export interface Event {
-  id: number;
-  title: string;
-  image: string;
-  venue: string;
-  city: string;
-  category: string;
-  price: number;
-  date_day: string;
-  date_month: string;
-  date_full: string;
-  time: string;
-  description?: string;
-  venue_map?: string;
-  show_banner?: boolean;
-  event_date?: string;
-  has_discount?: boolean; // NUEVO
-  discount_type?: 'percentage' | 'fixed'; // NUEVO
-  discount_value?: number; // NUEVO
-  created_at?: string;
-}
-
-// ============================================
-// NUEVAS FUNCIONES - Event Dates API
-// ============================================
-
-export const eventDatesApi = {
-  // Obtener todas las fechas de un evento
-  async getByEventId(eventId: number): Promise<EventDate[]> {
-    const { data, error } = await supabase
-      .from('event_dates')
-      .select('*')
-      .eq('event_id', eventId)
-      .eq('is_active', true)
-      .order('event_date', { ascending: true });
-
-    if (error) {
-      console.error('Error fetching event dates:', error);
-      return [];
-    }
-
-    return data || [];
-  },
-
-  // Crear nueva fecha para un evento
-  async create(eventDateData: Omit<EventDate, 'id' | 'created_at'>): Promise<EventDate> {
-    const { data, error } = await supabase
-      .from('event_dates')
-      .insert([eventDateData])
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error creating event date:', error);
-      throw error;
-    }
-
-    return data;
-  },
-
-  // Eliminar fecha de evento
-  async delete(id: number): Promise<void> {
-    const { error } = await supabase
-      .from('event_dates')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      console.error('Error deleting event date:', error);
-      throw error;
-    }
-  }
-};
-
-// ============================================
-// ACTUALIZAR ticketsApi EXISTENTE
-// Agregar esta función a ticketsApi
-// ============================================
-
-// Agregar a ticketsApi:
-async getByEventDateId(eventDateId: number): Promise<Ticket[]> {
-  const { data, error } = await supabase
-    .from('tickets')
-    .select('*')
-    .eq('event_date_id', eventDateId)
-    .order('price', { ascending: true });
-
-  if (error) {
-    console.error('Error fetching tickets by date:', error);
-    return [];
-  }
-
-  return data || [];
-}
-
-// ============================================
-// FUNCIONES HELPER PARA CALCULAR DESCUENTOS
-// ============================================
-
 export function calculateDiscount(
   price: number, 
   discountType: 'percentage' | 'fixed', 
@@ -749,7 +686,6 @@ export function calculateDiscount(
     finalPrice = price - discount;
   }
 
-  // Asegurar que no sea negativo
   if (finalPrice < 0) finalPrice = 0;
 
   const percentage = Math.round((discount / price) * 100);
@@ -771,38 +707,3 @@ export function getDiscountBadgeText(
   }
   return `PROMO`;
 }
-
-// ============================================
-// EJEMPLO DE USO
-// ============================================
-
-/*
-// Obtener fechas de un evento
-const dates = await eventDatesApi.getByEventId(1);
-
-// Obtener tickets de una fecha específica
-const tickets = await ticketsApi.getByEventDateId(dates[0].id);
-
-// Calcular descuento
-const ticket = tickets[0];
-if (ticket.has_discount) {
-  const result = calculateDiscount(
-    ticket.price,
-    ticket.discount_type || 'percentage',
-    ticket.discount_value || 0
-  );
-  console.log('Precio original:', result.originalPrice);
-  console.log('Precio final:', result.finalPrice);
-  console.log('Descuento:', result.percentage + '%');
-}
-
-// Badge de descuento
-const event = await eventsApi.getById(1);
-if (event.has_discount) {
-  const badge = getDiscountBadgeText(
-    event.discount_type || 'percentage',
-    event.discount_value || 0
-  );
-  console.log('Badge:', badge); // "-20%" o "PROMO"
-}
-*/
