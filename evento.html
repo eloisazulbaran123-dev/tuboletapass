@@ -143,18 +143,7 @@
   </div>
 
   <script type="module">
-    import { eventsApi, ticketsApi, formatPrice } from '/src/supabase.ts';
-
-    // Intentar importar funciones avanzadas (pueden no estar disponibles)
-    let eventDatesApi, calculateDiscount, getDiscountBadgeText;
-    try {
-      const supabaseModule = await import('/src/supabase.ts');
-      eventDatesApi = supabaseModule.eventDatesApi;
-      calculateDiscount = supabaseModule.calculateDiscount;
-      getDiscountBadgeText = supabaseModule.getDiscountBadgeText;
-    } catch (e) {
-      console.log('Funciones avanzadas no disponibles');
-    }
+    import { eventsApi, ticketsApi, formatPrice, eventDatesApi, calculateDiscount, getDiscountBadgeText } from '/src/supabase.ts';
 
     const urlParams = new URLSearchParams(window.location.search);
     const eventId = parseInt(urlParams.get('id'));
@@ -183,13 +172,11 @@
         }
 
         // Cargar fechas si la API está disponible
-        if (eventDatesApi && eventDatesApi.getByEventId) {
-          try {
-            availableDates = await eventDatesApi.getByEventId(eventId);
-          } catch (error) {
-            console.log('No hay fechas múltiples');
-            availableDates = [];
-          }
+        try {
+          availableDates = await eventDatesApi.getByEventId(eventId);
+        } catch (error) {
+          console.log('No hay fechas múltiples');
+          availableDates = [];
         }
 
         // Cargar tickets
@@ -221,7 +208,7 @@
 
       // Badge de descuento
       let discountBadge = '';
-      if (event.has_discount && getDiscountBadgeText) {
+      if (event.has_discount) {
         try {
           const badgeText = getDiscountBadgeText(event.discount_type || 'percentage', event.discount_value || 0);
           discountBadge = `
@@ -400,10 +387,6 @@
     };
 
     async function loadTicketsByDate(dateId) {
-      if (!ticketsApi.getByEventDateId) {
-        return;
-      }
-
       try {
         tickets = await ticketsApi.getByEventDateId(dateId);
         renderTickets();
@@ -434,7 +417,7 @@
         const color = colors[ticket.type] || 'linear-gradient(135deg, #94a3b8 0%, #64748b 100%)';
         
         let priceHTML = '';
-        if (ticket.has_discount && calculateDiscount) {
+        if (ticket.has_discount) {
           try {
             const result = calculateDiscount(ticket.price, ticket.discount_type || 'percentage', ticket.discount_value || 0);
             const badgeText = ticket.discount_type === 'percentage' ? `-${Math.round(ticket.discount_value)}%` : 'PROMO';
