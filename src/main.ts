@@ -18,6 +18,9 @@ interface Event {
   venue_map?: string;
   show_banner?: boolean;
   event_date?: string;
+  has_discount?: boolean;
+  discount_type?: 'percentage' | 'fixed';
+  discount_value?: number;
 }
 
 interface Filters {
@@ -155,32 +158,50 @@ function renderFeaturedEvents(events: Event[]): void {
     return;
   }
 
-  container.innerHTML = events.map(event => `
-    <div class="event-card-improved" onclick="window.location.href='evento.html?id=${event.id}'">
-      <div class="event-card-image">
-        <img src="${event.image}" alt="${event.title}" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22200%22%3E%3Crect fill=%22%23e5e7eb%22 width=%22400%22 height=%22200%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23666%22 font-size=%2218%22%3EEvento%3C/text%3E%3C/svg%3E'">
-        <div class="event-card-date">
-          <span class="date-day">${event.date_day}</span>
-          <span class="date-month">${event.date_month}</span>
+  container.innerHTML = events.map(event => {
+    const discountBadge = getDiscountBadge(event);
+    const finalPrice = calculateFinalPrice(event.price, event.has_discount || false, event.discount_type, event.discount_value);
+    
+    let priceHTML = '';
+    if (event.has_discount) {
+      priceHTML = `
+        <div style="display:flex;flex-direction:column;gap:0.25rem;">
+          <span style="font-size:0.85rem;color:#999;text-decoration:line-through;">${formatPrice(event.price)}</span>
+          <span class="event-card-price">${formatPrice(finalPrice)}</span>
+        </div>
+      `;
+    } else {
+      priceHTML = `<span class="event-card-price">${formatPrice(event.price)}</span>`;
+    }
+    
+    return `
+      <div class="event-card-improved" onclick="window.location.href='evento.html?id=${event.id}'">
+        <div class="event-card-image" style="position:relative;">
+          ${discountBadge}
+          <img src="${event.image}" alt="${event.title}" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22200%22%3E%3Crect fill=%22%23e5e7eb%22 width=%22400%22 height=%22200%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23666%22 font-size=%2218%22%3EEvento%3C/text%3E%3C/svg%3E'">
+          <div class="event-card-date">
+            <span class="date-day">${event.date_day}</span>
+            <span class="date-month">${event.date_month}</span>
+          </div>
+        </div>
+        <div class="event-card-body">
+          <h3 class="event-card-title">${event.title}</h3>
+          <p class="event-card-venue">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+            ${event.venue}
+          </p>
+          <p class="event-card-city">${event.city}</p>
+          <div class="event-card-footer">
+            ${priceHTML}
+            <button class="event-card-btn">Comprar →</button>
+          </div>
         </div>
       </div>
-      <div class="event-card-body">
-        <h3 class="event-card-title">${event.title}</h3>
-        <p class="event-card-venue">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-            <circle cx="12" cy="10" r="3"/>
-          </svg>
-          ${event.venue}
-        </p>
-        <p class="event-card-city">${event.city}</p>
-        <div class="event-card-footer">
-          <span class="event-card-price">${formatPrice(event.price)}</span>
-          <button class="event-card-btn">Comprar →</button>
-        </div>
-      </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 // ============================================
@@ -365,6 +386,34 @@ function setupFilters(): void {
   });
 
   console.log('✅ Filtros configurados correctamente');
+}
+
+// ============================================
+// HELPERS PARA DESCUENTOS
+// ============================================
+function getDiscountBadge(event: Event): string {
+  if (!event.has_discount) return '';
+  
+  const badgeText = event.discount_type === 'percentage' 
+    ? `-${Math.round(event.discount_value || 0)}%`
+    : 'PROMO';
+  
+  const badgeClass = event.discount_type === 'percentage' ? 'discount-badge' : 'discount-badge promo';
+  
+  return `
+    <div class="${badgeClass}" style="position:absolute;top:0.75rem;right:0.75rem;background:linear-gradient(135deg,#ef4444,#dc2626);color:white;padding:0.4rem 0.9rem;border-radius:20px;font-weight:800;font-size:0.85rem;z-index:10;box-shadow:0 4px 12px rgba(239,68,68,0.4);">
+      ${badgeText}
+    </div>
+  `;
+}
+
+function calculateFinalPrice(price: number, hasDiscount: boolean, discountType?: string, discountValue?: number): number {
+  if (!hasDiscount || !discountValue) return price;
+  
+  if (discountType === 'percentage') {
+    return price - (price * discountValue / 100);
+  }
+  return price - discountValue;
 }
 
 // ============================================

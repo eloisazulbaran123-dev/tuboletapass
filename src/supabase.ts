@@ -600,3 +600,209 @@ export function formatDateTime(dateString: string): string {
     minute: '2-digit'
   });
 }
+/* =====================================================
+   AGREGAR ESTAS INTERFACES Y FUNCIONES A supabase.ts
+   ===================================================== */
+
+// ============================================
+// NUEVAS INTERFACES
+// ============================================
+
+export interface EventDate {
+  id: number;
+  event_id: number;
+  event_date: string;
+  event_time: string;
+  is_active: boolean;
+  created_at?: string;
+}
+
+// Actualizar interface Ticket existente para incluir descuentos
+export interface Ticket {
+  id: number;
+  event_id: number;
+  event_date_id?: number; // NUEVO
+  type: string;
+  price: number;
+  quantity: number;
+  available: number;
+  has_discount?: boolean; // NUEVO
+  discount_type?: 'percentage' | 'fixed'; // NUEVO
+  discount_value?: number; // NUEVO
+  final_price?: number; // NUEVO (calculado automáticamente)
+  created_at?: string;
+}
+
+// Actualizar interface Event existente
+export interface Event {
+  id: number;
+  title: string;
+  image: string;
+  venue: string;
+  city: string;
+  category: string;
+  price: number;
+  date_day: string;
+  date_month: string;
+  date_full: string;
+  time: string;
+  description?: string;
+  venue_map?: string;
+  show_banner?: boolean;
+  event_date?: string;
+  has_discount?: boolean; // NUEVO
+  discount_type?: 'percentage' | 'fixed'; // NUEVO
+  discount_value?: number; // NUEVO
+  created_at?: string;
+}
+
+// ============================================
+// NUEVAS FUNCIONES - Event Dates API
+// ============================================
+
+export const eventDatesApi = {
+  // Obtener todas las fechas de un evento
+  async getByEventId(eventId: number): Promise<EventDate[]> {
+    const { data, error } = await supabase
+      .from('event_dates')
+      .select('*')
+      .eq('event_id', eventId)
+      .eq('is_active', true)
+      .order('event_date', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching event dates:', error);
+      return [];
+    }
+
+    return data || [];
+  },
+
+  // Crear nueva fecha para un evento
+  async create(eventDateData: Omit<EventDate, 'id' | 'created_at'>): Promise<EventDate> {
+    const { data, error } = await supabase
+      .from('event_dates')
+      .insert([eventDateData])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating event date:', error);
+      throw error;
+    }
+
+    return data;
+  },
+
+  // Eliminar fecha de evento
+  async delete(id: number): Promise<void> {
+    const { error } = await supabase
+      .from('event_dates')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error deleting event date:', error);
+      throw error;
+    }
+  }
+};
+
+// ============================================
+// ACTUALIZAR ticketsApi EXISTENTE
+// Agregar esta función a ticketsApi
+// ============================================
+
+// Agregar a ticketsApi:
+async getByEventDateId(eventDateId: number): Promise<Ticket[]> {
+  const { data, error } = await supabase
+    .from('tickets')
+    .select('*')
+    .eq('event_date_id', eventDateId)
+    .order('price', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching tickets by date:', error);
+    return [];
+  }
+
+  return data || [];
+}
+
+// ============================================
+// FUNCIONES HELPER PARA CALCULAR DESCUENTOS
+// ============================================
+
+export function calculateDiscount(
+  price: number, 
+  discountType: 'percentage' | 'fixed', 
+  discountValue: number
+): { originalPrice: number; finalPrice: number; discount: number; percentage: number } {
+  let finalPrice = price;
+  let discount = 0;
+
+  if (discountType === 'percentage') {
+    discount = (price * discountValue) / 100;
+    finalPrice = price - discount;
+  } else {
+    discount = discountValue;
+    finalPrice = price - discount;
+  }
+
+  // Asegurar que no sea negativo
+  if (finalPrice < 0) finalPrice = 0;
+
+  const percentage = Math.round((discount / price) * 100);
+
+  return {
+    originalPrice: price,
+    finalPrice,
+    discount,
+    percentage
+  };
+}
+
+export function getDiscountBadgeText(
+  discountType: 'percentage' | 'fixed',
+  discountValue: number
+): string {
+  if (discountType === 'percentage') {
+    return `-${Math.round(discountValue)}%`;
+  }
+  return `PROMO`;
+}
+
+// ============================================
+// EJEMPLO DE USO
+// ============================================
+
+/*
+// Obtener fechas de un evento
+const dates = await eventDatesApi.getByEventId(1);
+
+// Obtener tickets de una fecha específica
+const tickets = await ticketsApi.getByEventDateId(dates[0].id);
+
+// Calcular descuento
+const ticket = tickets[0];
+if (ticket.has_discount) {
+  const result = calculateDiscount(
+    ticket.price,
+    ticket.discount_type || 'percentage',
+    ticket.discount_value || 0
+  );
+  console.log('Precio original:', result.originalPrice);
+  console.log('Precio final:', result.finalPrice);
+  console.log('Descuento:', result.percentage + '%');
+}
+
+// Badge de descuento
+const event = await eventsApi.getById(1);
+if (event.has_discount) {
+  const badge = getDiscountBadgeText(
+    event.discount_type || 'percentage',
+    event.discount_value || 0
+  );
+  console.log('Badge:', badge); // "-20%" o "PROMO"
+}
+*/
