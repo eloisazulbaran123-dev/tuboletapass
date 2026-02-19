@@ -93,461 +93,35 @@
     }
     /* ============================================ */
     
+    /* Badge de descuento en imagen */
+    .event-discount-badge {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 30px;
+      font-size: 1.5rem;
+      font-weight: 800;
+      box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
+      z-index: 10;
+    }
+    
     @media (min-width: 768px) {
       .event-grid { grid-template-columns: 1fr 420px; }
       .event-hero { height: 400px; }
       .event-info h1 { font-size: 2.25rem; }
     }
-    /* =====================================================
-   SELECTOR DE FECHAS
-   ===================================================== */
-
-.event-dates-section {
-  background: var(--white);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.event-dates-section h3 {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--blue);
-  margin-bottom: 1rem;
-}
-
-.dates-selector {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-}
-
-.date-option {
-  border: 2px solid var(--border);
-  border-radius: 12px;
-  padding: 1rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  text-align: center;
-}
-
-.date-option:hover {
-  border-color: var(--cyan);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 180, 216, 0.2);
-}
-
-.date-option.selected {
-  border-color: var(--cyan);
-  background: rgba(0, 180, 216, 0.05);
-}
-
-.date-option-day {
-  font-size: 1.75rem;
-  font-weight: 800;
-  color: var(--blue);
-  line-height: 1;
-}
-
-.date-option-month {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--cyan);
-  text-transform: uppercase;
-  margin-top: 0.25rem;
-}
-
-.date-option-time {
-  font-size: 0.875rem;
-  color: var(--text-light);
-  margin-top: 0.5rem;
-}
-
-/* =====================================================
-   LOCALIDADES MEJORADAS (GRID)
-   ===================================================== */
-
-.localities-section h3 {
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: var(--blue);
-  margin-bottom: 1.5rem;
-}
-
-.localities-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 1.25rem;
-  margin-bottom: 1.5rem;
-}
-
-.locality-card {
-  border: 2px solid var(--border);
-  border-radius: 12px;
-  padding: 1.25rem;
-  cursor: pointer;
-  transition: all 0.3s;
-  position: relative;
-  background: white;
-}
-
-.locality-card:hover {
-  border-color: var(--cyan);
-  transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-}
-
-.locality-card.selected {
-  border-color: var(--cyan);
-  background: rgba(0, 180, 216, 0.08);
-  box-shadow: 0 0 0 2px rgba(0, 180, 216, 0.2);
-}
-
-.locality-card.sold-out {
-  opacity: 0.5;
-  cursor: not-allowed;
-  pointer-events: none;
-}
-
-.locality-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-}
-
-.locality-name {
-  font-weight: 700;
-  font-size: 1.1rem;
-  color: var(--blue);
-  margin: 0;
-}
-
-.locality-color {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  flex-shrink: 0;
-}
-
-.locality-pricing {
-  margin-bottom: 0.75rem;
-}
-
-.locality-price-original {
-  font-size: 0.875rem;
-  color: var(--text-light);
-  text-decoration: line-through;
-  margin-bottom: 0.25rem;
-}
-
-.locality-price {
-  font-weight: 800;
-  color: var(--cyan);
-  font-size: 1.5rem;
-  line-height: 1;
-}
-
-.locality-discount-badge {
-  display: inline-block;
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  color: white;
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  margin-left: 0.5rem;
-  vertical-align: middle;
-}
-
-.locality-availability {
-  font-size: 0.85rem;
-  color: var(--text-light);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.locality-availability-bar {
-  flex: 1;
-  height: 4px;
-  background: var(--border);
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-.locality-availability-fill {
-  height: 100%;
-  background: var(--cyan);
-  border-radius: 2px;
-  transition: width 0.3s;
-}
-
-.sold-out-label {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(239, 68, 68, 0.95);
-  color: white;
-  padding: 0.75rem 1.5rem;
-  border-radius: 30px;
-  font-weight: 800;
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
-}
-
-/* =====================================================
-   BADGE DE DESCUENTO EN IMAGEN DEL EVENTO
-   ===================================================== */
-
-.event-hero {
-  position: relative;
-}
-
-.event-discount-badge {
-  position: absolute;
-  top: 1.5rem;
-  right: 1.5rem;
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  color: white;
-  padding: 0.75rem 1.5rem;
-  border-radius: 30px;
-  font-size: 1.5rem;
-  font-weight: 800;
-  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
-  z-index: 10;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-}
-
-.event-discount-badge-promo {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4);
-}
-
-/* =====================================================
-   PLANO DEL EVENTO MEJORADO
-   ===================================================== */
-
-.event-venue-map {
-  margin-top: 2rem;
-  background: var(--white);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 1.5rem;
-}
-
-.event-venue-map h3 {
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: var(--blue);
-  margin-bottom: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.venue-map-container {
-  width: 100%;
-  max-width: 100%;
-  border-radius: 12px;
-  overflow: hidden;
-  border: 2px solid var(--border);
-  cursor: zoom-in;
-  transition: transform 0.3s;
-  position: relative;
-}
-
-.venue-map-container:hover {
-  transform: scale(1.02);
-  border-color: var(--cyan);
-}
-
-.venue-map-container img {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-.map-zoom-hint {
-  position: absolute;
-  bottom: 1rem;
-  right: 1rem;
-  background: rgba(26, 58, 74, 0.9);
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  pointer-events: none;
-}
-
-/* Modal del plano */
-.venue-map-modal {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.95);
-  z-index: 10000;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-}
-
-.venue-map-modal.active {
-  display: flex;
-}
-
-.venue-map-modal-content {
-  position: relative;
-  max-width: 90vw;
-  max-height: 90vh;
-  animation: zoomIn 0.3s;
-}
-
-@keyframes zoomIn {
-  from {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.venue-map-modal img {
-  max-width: 100%;
-  max-height: 90vh;
-  border-radius: 8px;
-}
-
-.venue-map-modal-close {
-  position: absolute;
-  top: -3rem;
-  right: 0;
-  background: white;
-  border: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  color: var(--blue);
-  transition: all 0.2s;
-}
-
-.venue-map-modal-close:hover {
-  background: var(--cyan);
-  color: white;
-  transform: rotate(90deg);
-}
-
-/* =====================================================
-   RESPONSIVE
-   ===================================================== */
-
-@media (max-width: 768px) {
-  .localities-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  .dates-selector {
-    grid-template-columns: 1fr;
-  }
-
-  .event-discount-badge {
-    font-size: 1.25rem;
-    padding: 0.5rem 1rem;
-    top: 1rem;
-    right: 1rem;
-  }
-
-  .venue-map-container {
-    border-radius: 8px;
-  }
-
-  .venue-map-modal-content {
-    max-width: 95vw;
-    padding: 1rem;
-  }
-
-  .locality-card {
-    padding: 1rem;
-  }
-
-  .locality-name {
-    font-size: 1rem;
-  }
-
-  .locality-price {
-    font-size: 1.25rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .locality-color {
-    width: 32px;
-    height: 32px;
-  }
-
-  .event-venue-map {
-    padding: 1rem;
-  }
-
-  .event-dates-section {
-    padding: 1rem;
-  }
-}
-
-/* =====================================================
-   MEJORAS ADICIONALES
-   ===================================================== */
-
-.quantity-section {
-  border-top: 2px solid var(--border);
-  padding-top: 1.5rem;
-  margin-top: 1.5rem;
-}
-
-.total-section {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  border: 2px solid var(--border);
-  border-radius: 12px;
-  padding: 1.5rem;
-}
-
-.buy-btn {
-  background: linear-gradient(135deg, var(--yellow) 0%, #f57f17 100%);
-  box-shadow: 0 4px 12px rgba(249, 168, 37, 0.3);
-  transition: all 0.3s;
-}
-
-.buy-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(249, 168, 37, 0.4);
-}
+    
+    @media (max-width: 768px) {
+      .event-discount-badge {
+        font-size: 1.25rem;
+        padding: 0.5rem 1rem;
+        top: 1rem;
+        right: 1rem;
+      }
+    }
   </style>
 </head>
 <body>
@@ -569,428 +143,342 @@
   </div>
 
   <script type="module">
-    import { eventsApi, ticketsApi, eventDatesApi, formatPrice, calculateDiscount, getDiscountBadgeText } from './supabase.ts';
+    import { eventsApi, ticketsApi, formatPrice } from '/src/supabase.ts';
 
-// Estado global
-let currentEvent = null;
-let selectedDate = null;
-let selectedLocality = null;
-let quantity = 1;
-let availableTickets = [];
+    const urlParams = new URLSearchParams(window.location.search);
+    const eventId = parseInt(urlParams.get('id'));
 
-// ============================================
-// CARGAR DATOS DEL EVENTO
-// ============================================
+    let event = null;
+    let tickets = [];
+    let selectedTicket = null;
+    let quantity = 1;
 
-async function loadEvent() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const eventId = parseInt(urlParams.get('id'));
+    async function loadEvent() {
+      try {
+        if (!eventId) {
+          alert('ID de evento no válido');
+          window.location.href = '/';
+          return;
+        }
 
-  if (!eventId) {
-    window.location.href = '/';
-    return;
-  }
+        event = await eventsApi.getById(eventId);
+        
+        if (!event) {
+          alert('Evento no encontrado');
+          window.location.href = '/';
+          return;
+        }
 
-  try {
-    // Cargar evento
-    currentEvent = await eventsApi.getById(eventId);
-    if (!currentEvent) {
-      throw new Error('Evento no encontrado');
-    }
+        // Cargar tickets/localidades del evento
+        try {
+          tickets = await ticketsApi.getByEventId(eventId);
+          console.log('Tickets cargados:', tickets);
+        } catch (error) {
+          console.error('Error al cargar tickets:', error);
+          tickets = [];
+        }
 
-    // Cargar fechas disponibles
-    const dates = await eventDatesApi.getByEventId(eventId);
-
-    // Renderizar evento
-    renderEvent(currentEvent, dates);
-
-    // Si solo hay una fecha, seleccionarla automáticamente
-    if (dates.length === 1) {
-      selectedDate = dates[0];
-      await loadTickets(dates[0].id);
-    } else if (dates.length > 1) {
-      renderDateSelector(dates);
-    } else {
-      // No hay fechas, usar tickets sin fecha
-      await loadTickets(null);
-    }
-
-  } catch (error) {
-    console.error('Error cargando evento:', error);
-    document.getElementById('event-content').innerHTML = `
-      <div style="text-align:center;padding:3rem;">
-        <p style="color:#ef4444;font-size:1.1rem;">Error al cargar el evento</p>
-        <a href="/" style="color:var(--cyan);text-decoration:none;margin-top:1rem;display:inline-block;">← Volver al inicio</a>
-      </div>
-    `;
-  }
-}
-
-// ============================================
-// RENDERIZAR EVENTO
-// ============================================
-
-function renderEvent(event, dates) {
-  // Hero image con badge de descuento
-  let discountBadge = '';
-  if (event.has_discount) {
-    const badgeText = getDiscountBadgeText(event.discount_type || 'percentage', event.discount_value || 0);
-    const badgeClass = event.discount_type === 'percentage' ? '' : 'event-discount-badge-promo';
-    discountBadge = `<div class="event-discount-badge ${badgeClass}">${badgeText}</div>`;
-  }
-
-  document.querySelector('.event-hero').innerHTML = `
-    ${discountBadge}
-    <img src="${event.image}" alt="${event.title}">
-  `;
-
-  // Título y meta
-  document.querySelector('.event-info h1').textContent = event.title;
-
-  const metaHTML = `
-    <div class="event-meta-item">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-        <circle cx="12" cy="10" r="3"/>
-      </svg>
-      ${event.venue}, ${event.city}
-    </div>
-    ${dates.length <= 1 ? `
-      <div class="event-meta-item">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-          <line x1="16" y1="2" x2="16" y2="6"/>
-          <line x1="8" y1="2" x2="8" y2="6"/>
-          <line x1="3" y1="10" x2="21" y2="10"/>
-        </svg>
-        ${event.date_full}
-      </div>
-      <div class="event-meta-item">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/>
-          <polyline points="12 6 12 12 16 14"/>
-        </svg>
-        ${event.time}
-      </div>
-    ` : `
-      <div class="event-meta-item">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-          <line x1="16" y1="2" x2="16" y2="6"/>
-          <line x1="8" y1="2" x2="8" y2="6"/>
-          <line x1="3" y1="10" x2="21" y2="10"/>
-        </svg>
-        ${dates.length} fechas disponibles
-      </div>
-    `}
-  `;
-
-  document.querySelector('.event-meta').innerHTML = metaHTML;
-
-  if (event.description) {
-    document.querySelector('.event-description').textContent = event.description;
-  }
-
-  // Plano del evento
-  if (event.venue_map) {
-    renderVenueMap(event.venue_map);
-  }
-}
-
-// ============================================
-// SELECTOR DE FECHAS
-// ============================================
-
-function renderDateSelector(dates) {
-  const container = document.getElementById('localities-container');
-  
-  const datesHTML = `
-    <div class="event-dates-section">
-      <h3>📅 Selecciona una fecha</h3>
-      <div class="dates-selector">
-        ${dates.map((date, index) => {
-          const dateObj = new Date(date.event_date + 'T00:00:00');
-          const day = dateObj.getDate();
-          const month = dateObj.toLocaleDateString('es-ES', { month: 'short' }).toUpperCase();
+        // Si no hay tickets en la base de datos, crear tickets por defecto
+        if (!tickets || tickets.length === 0) {
+          console.log('No hay tickets en la BD, creando tickets por defecto...');
           
-          return `
-            <div class="date-option ${index === 0 ? 'selected' : ''}" onclick="selectDate(${date.id}, ${index})">
-              <div class="date-option-day">${day}</div>
-              <div class="date-option-month">${month}</div>
-              <div class="date-option-time">⏰ ${date.event_time}</div>
+          // Crear tickets por defecto para este evento
+          const defaultTickets = [
+            {
+              event_id: eventId,
+              type: 'General',
+              price: event.price || 50000,
+              total: 100,
+              available: 100,
+              color: '#60a5fa'
+            },
+            {
+              event_id: eventId,
+              type: 'VIP',
+              price: (event.price || 50000) * 2,
+              total: 50,
+              available: 50,
+              color: '#fbbf24'
+            },
+            {
+              event_id: eventId,
+              type: 'Platea',
+              price: (event.price || 50000) * 1.5,
+              total: 75,
+              available: 75,
+              color: '#34d399'
+            }
+          ];
+
+          // Intentar crear los tickets en la base de datos
+          try {
+            for (const ticket of defaultTickets) {
+              await ticketsApi.create(ticket);
+            }
+            
+            // Recargar los tickets
+            tickets = await ticketsApi.getByEventId(eventId);
+            console.log('Tickets por defecto creados:', tickets);
+          } catch (error) {
+            console.error('Error al crear tickets por defecto:', error);
+            // Si falla, usar los tickets por defecto en memoria
+            tickets = defaultTickets.map((t, index) => ({
+              ...t,
+              id: index + 1
+            }));
+          }
+        }
+
+        renderEvent();
+
+      } catch (error) {
+        console.error('Error al cargar evento:', error);
+        alert('Error al cargar el evento: ' + error.message);
+        window.location.href = '/';
+      }
+    }
+
+    function renderEvent() {
+      document.title = event.title + ' - TuBoleta';
+
+      // Badge de descuento
+      let discountBadge = '';
+      if (event.has_discount) {
+        const badgeText = event.discount_type === 'percentage' 
+          ? `-${Math.round(event.discount_value)}%`
+          : 'PROMO';
+        discountBadge = `<div class="event-discount-badge">${badgeText}</div>`;
+      }
+
+      const html = `
+        <div class="event-hero">
+          ${discountBadge}
+          <img src="${event.image}" alt="${event.title}">
+        </div>
+
+        <section class="event-details">
+          <div class="container">
+            <div class="event-grid">
+              <div class="event-info">
+                <h1>${event.title}</h1>
+                <div class="event-meta">
+                  <div class="event-meta-item">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                      <path d="M6.667 1.667v2.5M13.333 1.667v2.5M2.917 7.5h14.166M4.167 3.333h11.666c.92 0 1.667.746 1.667 1.667v11.667c0 .92-.746 1.666-1.667 1.666H4.167c-.92 0-1.667-.746-1.667-1.666V5c0-.92.746-1.667 1.667-1.667z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span>${event.date_full}</span>
+                  </div>
+                  <div class="event-meta-item">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                      <path d="M10 17.5a7.5 7.5 0 100-15 7.5 7.5 0 000 15z" stroke="currentColor" stroke-width="1.5"/>
+                      <path d="M10 5v5l3.333 1.667" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    <span>${event.time}</span>
+                  </div>
+                  <div class="event-meta-item">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                      <path d="M17.5 8.333c0 5.834-7.5 10-7.5 10s-7.5-4.166-7.5-10a7.5 7.5 0 1115 0z" stroke="currentColor" stroke-width="1.5"/>
+                      <path d="M10 10.833a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    <span>${event.venue} - ${event.city}</span>
+                  </div>
+                </div>
+                ${event.description ? `<p class="event-description">${event.description}</p>` : ''}
+                
+                <!-- SECCIÓN DEL PLANO DEL EVENTO (NUEVO) -->
+                ${event.venue_map ? `
+                  <div class="event-venue-map">
+                    <h3>
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M17.5 8.333c0 5.834-7.5 10-7.5 10s-7.5-4.166-7.5-10a7.5 7.5 0 1115 0z" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M10 10.833a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" stroke="currentColor" stroke-width="1.5"/>
+                      </svg>
+                      Plano del Evento
+                    </h3>
+                    <div class="venue-map-container">
+                      <img src="${event.venue_map}" alt="Plano de ${event.venue}" loading="lazy">
+                    </div>
+                  </div>
+                ` : ''}
+                <!-- FIN SECCIÓN DEL PLANO -->
+              </div>
+
+              <div class="localities-section">
+                <h3>Selecciona una localidad</h3>
+                <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 1rem;">
+                  Elige tu ubicación preferida
+                </p>
+                <div class="localities-grid" id="localitiesGrid"></div>
+
+                <div class="quantity-section" id="quantitySection" style="display: none;">
+                  <div class="quantity-controls">
+                    <span class="quantity-label">Cantidad de boletas</span>
+                    <div class="quantity-btns">
+                      <button class="quantity-btn" id="decreaseQty">−</button>
+                      <span class="quantity-value" id="quantityValue">1</span>
+                      <button class="quantity-btn" id="increaseQty">+</button>
+                    </div>
+                  </div>
+
+                  <div class="total-section">
+                    <div class="total-row">
+                      <span>Precio unitario:</span>
+                      <span id="unitPrice">$0</span>
+                    </div>
+                    <div class="total-row">
+                      <span>Subtotal (<span id="qtyLabel">1</span> boletas):</span>
+                      <span id="subtotal">$0</span>
+                    </div>
+                    <div class="total-row">
+                      <span>Servicio (10%):</span>
+                      <span id="serviceFee">$0</span>
+                    </div>
+                    <div class="total-row final">
+                      <span>Total a pagar:</span>
+                      <span id="totalPrice">$0</span>
+                    </div>
+                  </div>
+
+                  <button class="buy-btn" id="buyBtn">
+                    Añadir al carrito
+                  </button>
+                </div>
+              </div>
             </div>
-          `;
-        }).join('')}
-      </div>
-    </div>
-  `;
+          </div>
+        </section>
+      `;
 
-  container.insertAdjacentHTML('beforebegin', datesHTML);
-
-  // Seleccionar primera fecha automáticamente
-  if (dates.length > 0) {
-    window.selectDate(dates[0].id, 0);
-  }
-}
-
-window.selectDate = async function(dateId, index) {
-  // Actualizar UI
-  document.querySelectorAll('.date-option').forEach((el, i) => {
-    el.classList.toggle('selected', i === index);
-  });
-
-  // Cargar tickets de esta fecha
-  const dates = await eventDatesApi.getByEventId(currentEvent.id);
-  selectedDate = dates.find(d => d.id === dateId);
-  
-  await loadTickets(dateId);
-};
-
-// ============================================
-// CARGAR LOCALIDADES
-// ============================================
-
-async function loadTickets(eventDateId) {
-  try {
-    if (eventDateId) {
-      availableTickets = await ticketsApi.getByEventDateId(eventDateId);
-    } else {
-      availableTickets = await ticketsApi.getByEventId(currentEvent.id);
+      document.getElementById('eventContent').innerHTML = html;
+      renderLocalities();
+      setupEventListeners();
     }
 
-    renderLocalities();
-  } catch (error) {
-    console.error('Error cargando localidades:', error);
-  }
-}
-
-// ============================================
-// RENDERIZAR LOCALIDADES
-// ============================================
-
-function renderLocalities() {
-  const container = document.getElementById('localities-grid');
-
-  if (availableTickets.length === 0) {
-    container.innerHTML = `
-      <div class="no-localities">
-        No hay localidades disponibles para esta fecha
-      </div>
-    `;
-    return;
-  }
-
-  container.innerHTML = availableTickets.map(ticket => {
-    const isSoldOut = ticket.available === 0;
-    const availabilityPercent = (ticket.available / ticket.quantity) * 100;
-    
-    // Calcular precio con descuento
-    let priceHTML;
-    if (ticket.has_discount) {
-      const result = calculateDiscount(
-        ticket.price,
-        ticket.discount_type || 'percentage',
-        ticket.discount_value || 0
-      );
+    function renderLocalities() {
+      const container = document.getElementById('localitiesGrid');
       
-      const badgeText = ticket.discount_type === 'percentage' 
-        ? `-${Math.round(ticket.discount_value)}%` 
-        : 'PROMO';
+      if (!tickets || tickets.length === 0) {
+        container.innerHTML = '<div class="no-localities">No hay localidades disponibles para este evento. Por favor contacta al administrador.</div>';
+        return;
+      }
 
-      priceHTML = `
-        <div class="locality-pricing">
-          <div class="locality-price-original">${formatPrice(result.originalPrice)}</div>
-          <div>
-            <span class="locality-price">${formatPrice(result.finalPrice)}</span>
-            <span class="locality-discount-badge">${badgeText}</span>
+      container.innerHTML = tickets.map(ticket => {
+        const soldOut = (ticket.available || 0) <= 0;
+        return `
+          <div class="locality-card ${soldOut ? 'sold-out' : ''}" 
+               data-id="${ticket.id}"
+               ${!soldOut ? `onclick="selectLocality(${ticket.id})"` : ''}>
+            <div class="locality-color" style="background: ${ticket.color || '#60a5fa'}"></div>
+            <div class="locality-name">${ticket.type}</div>
+            <div class="locality-price">${formatPrice(ticket.price)}</div>
+            <div class="locality-availability">${ticket.available || 0} disponibles</div>
+            ${soldOut ? '<div class="sold-out-label">AGOTADO</div>' : ''}
           </div>
-        </div>
-      `;
-    } else {
-      priceHTML = `
-        <div class="locality-pricing">
-          <div class="locality-price">${formatPrice(ticket.final_price || ticket.price)}</div>
-        </div>
-      `;
+        `;
+      }).join('');
     }
 
-    return `
-      <div class="locality-card ${isSoldOut ? 'sold-out' : ''}" onclick="selectLocality(${ticket.id})">
-        <div class="locality-header">
-          <h4 class="locality-name">${ticket.type}</h4>
-          <div class="locality-color" style="background: ${getColorForType(ticket.type)};"></div>
-        </div>
-        ${priceHTML}
-        <div class="locality-availability">
-          <span>${ticket.available} disponibles</span>
-          <div class="locality-availability-bar">
-            <div class="locality-availability-fill" style="width: ${availabilityPercent}%;"></div>
-          </div>
-        </div>
-        ${isSoldOut ? '<div class="sold-out-label">AGOTADO</div>' : ''}
-      </div>
-    `;
-  }).join('');
-}
+    window.selectLocality = function(ticketId) {
+      // Remover selección anterior
+      document.querySelectorAll('.locality-card').forEach(card => {
+        card.classList.remove('selected');
+      });
 
-// ============================================
-// SELECCIONAR LOCALIDAD
-// ============================================
+      // Seleccionar nueva localidad
+      const card = document.querySelector(`[data-id="${ticketId}"]`);
+      if (card) {
+        card.classList.add('selected');
+      }
 
-window.selectLocality = function(ticketId) {
-  const ticket = availableTickets.find(t => t.id === ticketId);
-  if (!ticket || ticket.available === 0) return;
+      selectedTicket = tickets.find(t => t.id === ticketId);
+      
+      if (!selectedTicket) {
+        console.error('Ticket no encontrado:', ticketId);
+        return;
+      }
+      
+      quantity = 1;
+      document.getElementById('quantityValue').textContent = '1';
+      
+      // Mostrar sección de cantidad
+      document.getElementById('quantitySection').style.display = 'block';
+      
+      updatePrices();
+    };
 
-  selectedLocality = ticket;
-  quantity = 1;
+    function setupEventListeners() {
+      document.getElementById('decreaseQty')?.addEventListener('click', () => {
+        if (quantity > 1) {
+          quantity--;
+          document.getElementById('quantityValue').textContent = quantity;
+          updatePrices();
+        }
+      });
 
-  // Actualizar UI
-  document.querySelectorAll('.locality-card').forEach(card => {
-    card.classList.remove('selected');
-  });
-  event.currentTarget?.classList.add('selected');
+      document.getElementById('increaseQty')?.addEventListener('click', () => {
+        if (!selectedTicket) return;
+        
+        const maxQty = Math.min(10, selectedTicket.available || 0);
+        if (quantity < maxQty) {
+          quantity++;
+          document.getElementById('quantityValue').textContent = quantity;
+          updatePrices();
+        } else {
+          alert(`Solo hay ${selectedTicket.available} boletas disponibles`);
+        }
+      });
 
-  // Mostrar sección de cantidad
-  document.getElementById('quantity-section').style.display = 'block';
-  updateTotal();
-};
+      document.getElementById('buyBtn')?.addEventListener('click', () => {
+        if (!event || !selectedTicket) {
+          alert('Por favor selecciona una localidad');
+          return;
+        }
 
-// ============================================
-// CONTROLES DE CANTIDAD
-// ============================================
+        if (quantity <= 0) {
+          alert('Selecciona al menos 1 boleta');
+          return;
+        }
 
-window.increaseQuantity = function() {
-  if (!selectedLocality) return;
-  if (quantity < selectedLocality.available && quantity < 10) {
-    quantity++;
-    updateTotal();
-  }
-};
+        const cartItem = {
+          eventId: event.id,
+          eventName: event.title,
+          eventImage: event.image,
+          eventDate: event.date_full,
+          eventVenue: event.venue,
+          ticketId: selectedTicket.id,
+          ticketType: selectedTicket.type,
+          ticketPrice: selectedTicket.price,
+          ticketColor: selectedTicket.color,
+          quantity: quantity,
+          subtotal: selectedTicket.price * quantity,
+          serviceFee: (selectedTicket.price * quantity) * 0.1,
+          total: (selectedTicket.price * quantity) * 1.1
+        };
 
-window.decreaseQuantity = function() {
-  if (quantity > 1) {
-    quantity--;
-    updateTotal();
-  }
-};
+        // Guardar en localStorage
+        localStorage.setItem('tuboleta-cart', JSON.stringify(cartItem));
+        
+        // Redirigir al checkout
+        window.location.href = '/checkout.html';
+      });
+    }
 
-// ============================================
-// ACTUALIZAR TOTAL
-// ============================================
+    function updatePrices() {
+      if (!selectedTicket) return;
+      
+      const subtotal = selectedTicket.price * quantity;
+      const fee = subtotal * 0.1;
+      const total = subtotal + fee;
 
-function updateTotal() {
-  if (!selectedLocality) return;
+      document.getElementById('unitPrice').textContent = formatPrice(selectedTicket.price);
+      document.getElementById('qtyLabel').textContent = quantity;
+      document.getElementById('subtotal').textContent = formatPrice(subtotal);
+      document.getElementById('serviceFee').textContent = formatPrice(fee);
+      document.getElementById('totalPrice').textContent = formatPrice(total);
+    }
 
-  const price = selectedLocality.final_price || selectedLocality.price;
-  const subtotal = price * quantity;
-  const fee = Math.round(subtotal * 0.1);
-  const total = subtotal + fee;
-
-  document.getElementById('quantity-value').textContent = quantity;
-  document.getElementById('subtotal').textContent = formatPrice(subtotal);
-  document.getElementById('fee').textContent = formatPrice(fee);
-  document.getElementById('total').textContent = formatPrice(total);
-  
-  // Habilitar botón de compra
-  document.getElementById('buy-btn').disabled = false;
-}
-
-// ============================================
-// COMPRAR
-// ============================================
-
-window.buyTickets = function() {
-  if (!selectedLocality || quantity === 0) return;
-
-  const purchaseData = {
-    event: currentEvent,
-    date: selectedDate,
-    ticket: selectedLocality,
-    quantity: quantity,
-    price: selectedLocality.final_price || selectedLocality.price,
-    subtotal: (selectedLocality.final_price || selectedLocality.price) * quantity
-  };
-
-  localStorage.setItem('purchase', JSON.stringify(purchaseData));
-  window.location.href = '/checkout.html';
-};
-
-// ============================================
-// PLANO DEL EVENTO
-// ============================================
-
-function renderVenueMap(mapUrl) {
-  const container = document.querySelector('.event-info');
-  
-  const mapHTML = `
-    <div class="event-venue-map">
-      <h3>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-          <circle cx="12" cy="10" r="3"/>
-        </svg>
-        Plano del evento
-      </h3>
-      <div class="venue-map-container" onclick="openMapModal('${mapUrl}')">
-        <img src="${mapUrl}" alt="Plano del evento">
-        <div class="map-zoom-hint">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8"/>
-            <path d="M21 21l-4.35-4.35"/>
-            <line x1="11" y1="8" x2="11" y2="14"/>
-            <line x1="8" y1="11" x2="14" y2="11"/>
-          </svg>
-          Click para ampliar
-        </div>
-      </div>
-    </div>
-  `;
-
-  container.insertAdjacentHTML('beforeend', mapHTML);
-
-  // Crear modal
-  const modalHTML = `
-    <div class="venue-map-modal" id="mapModal" onclick="closeMapModal()">
-      <div class="venue-map-modal-content" onclick="event.stopPropagation()">
-        <button class="venue-map-modal-close" onclick="closeMapModal()">×</button>
-        <img src="${mapUrl}" alt="Plano del evento">
-      </div>
-    </div>
-  `;
-
-  document.body.insertAdjacentHTML('beforeend', modalHTML);
-}
-
-window.openMapModal = function(mapUrl) {
-  document.getElementById('mapModal')?.classList.add('active');
-  document.body.style.overflow = 'hidden';
-};
-
-window.closeMapModal = function() {
-  document.getElementById('mapModal')?.classList.remove('active');
-  document.body.style.overflow = '';
-};
-
-// ============================================
-// HELPERS
-// ============================================
-
-function getColorForType(type) {
-  const colors = {
-    'General': 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)',
-    'VIP': 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
-    'Platea': 'linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%)',
-    'Preferencial': 'linear-gradient(135deg, #34d399 0%, #10b981 100%)'
-  };
-  return colors[type] || 'linear-gradient(135deg, #94a3b8 0%, #64748b 100%)';
-}
-
-// ============================================
-// INICIALIZAR
-// ============================================
-
-document.addEventListener('DOMContentLoaded', loadEvent);
-
-</script>
+    // Iniciar carga del evento
+    loadEvent();
+  </script>
 </body>
 </html>
