@@ -248,10 +248,32 @@
       // ✅ PASO 1: VERIFICAR AUTENTICACIÓN
       await checkAuthentication();
       
-      cartItem = JSON.parse(localStorage.getItem('tuboleta-cart') || 'null');
-
-      if (!cartItem) {
+      // ✅ LEER DESDE 'purchase' (como lo guarda evento.html)
+      console.log('🔍 Buscando datos de compra...');
+      const purchaseData = localStorage.getItem('purchase');
+      console.log('📦 localStorage.purchase:', purchaseData);
+      
+      if (!purchaseData) {
+        console.error('❌ No hay datos en localStorage');
         alert('No hay artículos en el carrito');
+        window.location.href = '/';
+        return;
+      }
+      
+      try {
+        cartItem = JSON.parse(purchaseData);
+        console.log('✅ Datos parseados:', cartItem);
+        
+        // Validar estructura
+        if (!cartItem.event || !cartItem.ticket) {
+          console.error('❌ Estructura inválida:', cartItem);
+          alert('Datos de compra inválidos');
+          window.location.href = '/';
+          return;
+        }
+      } catch (error) {
+        console.error('❌ Error parseando:', error);
+        alert('Error al cargar el carrito');
         window.location.href = '/';
         return;
       }
@@ -302,14 +324,19 @@
       const container = document.getElementById('orderItems');
       if (!container || !cartItem) return;
       
+      // Estructura desde evento.html: {event, ticket, quantity, price, subtotal, date}
+      const event = cartItem.event;
+      const ticket = cartItem.ticket;
+      const date = cartItem.date;
+      
       container.innerHTML = `
         <div class="order-item">
-          <img src="${cartItem.eventImage || cartItem.image}" alt="${cartItem.eventName || cartItem.title}" />
+          <img src="${event.image}" alt="${event.title}" />
           <div class="order-item-info" style="flex: 1;">
-            <h4>${cartItem.eventName || cartItem.title}</h4>
-            <p>${cartItem.eventVenue || ''}</p>
-            <p>${cartItem.eventDate || ''}</p>
-            <p style="color:var(--cyan);font-weight:600;">${cartItem.ticketType}</p>
+            <h4>${event.title}</h4>
+            <p>${event.venue}, ${event.city}</p>
+            <p>${date ? `${date.event_date} - ${date.event_time}` : `${event.date_full} - ${event.time}`}</p>
+            <p style="color:var(--cyan);font-weight:600;">${ticket.type}</p>
             <p style="margin-top: 0.5rem;">Cantidad: ${cartItem.quantity}</p>
           </div>
         </div>
@@ -320,29 +347,17 @@
       const container = document.getElementById('summaryItems');
       if (!container || !cartItem) return;
       
-      // ✅ Calcular totales de forma más robusta (igual que en las funciones de pago)
-      let subtotal = 0;
-      let fee = 0;
-      let total = 0;
-
-      if (cartItem.subtotal && cartItem.serviceFee && cartItem.total) {
-        subtotal = cartItem.subtotal;
-        fee = cartItem.serviceFee;
-        total = cartItem.total;
-      } else if (cartItem.total) {
-        subtotal = Math.round(cartItem.total / 1.1);
-        fee = cartItem.total - subtotal;
-        total = cartItem.total;
-      } else if (cartItem.price && cartItem.quantity) {
-        subtotal = cartItem.price * cartItem.quantity;
-        fee = Math.round(subtotal * 0.1);
+      // Estructura desde evento.html tiene: price, subtotal, quantity
+      const subtotal = cartItem.subtotal || (cartItem.price * cartItem.quantity);
+      const fee = Math.round(subtotal * 0.1);
+      const total = subtotal + fee;
         total = subtotal + fee;
       }
 
       container.innerHTML = `
         <div style="margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--border);">
           <div style="display:flex;justify-content:space-between;">
-            <span style="font-weight:500;">${cartItem.ticketType || 'Entrada'}</span>
+            <span style="font-weight:500;">${cartItem.ticket ? cartItem.ticket.type : 'Entrada'}</span>
             <span>x${cartItem.quantity || 1}</span>
           </div>
         </div>
@@ -545,8 +560,8 @@
         const supabaseData = {
           user_id: currentUser.id,
           user_email: currentUser.email,
-          user_name: document.getElementById('name').value, // ✅ Agregar user_name
-          event_id: parseInt(cartItem.eventId, 10),
+          user_name: document.getElementById('name').value,
+          event_id: parseInt(cartItem.event.id, 10),
           tickets: { items: [cartItem] },
           amount: totalInt,
           total_amount: totalInt,
@@ -667,7 +682,7 @@
         console.log('📤 Enviando a Supabase:', {
           user_id: currentUser.id,
           user_email: currentUser.email,
-          event_id: cartItem.eventId,
+          event_id: cartItem.event.id,
           amount: totalInt,
           total_amount: totalInt
         });
@@ -675,8 +690,8 @@
         const supabaseOrder = await ordersApi.create({
           user_id: currentUser.id,
           user_email: currentUser.email,
-          user_name: document.getElementById('name').value, // ✅ Agregar user_name
-          event_id: parseInt(cartItem.eventId, 10),
+          user_name: document.getElementById('name').value,
+          event_id: parseInt(cartItem.event.id, 10),
           tickets: { items: [cartItem] },
           amount: parseInt(totalInt, 10),
           total_amount: parseInt(totalInt, 10),
