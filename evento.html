@@ -188,12 +188,7 @@
       margin: 0;
     }
     
-    .locality-color {
-      width: 32px;
-      height: 32px;
-      border-radius: 6px;
-      flex-shrink: 0;
-    }
+    /* Color eliminado - ya no se usa */
     
     .locality-price { 
       font-weight: 700; 
@@ -701,7 +696,6 @@
           <div class="locality-card ${isSoldOut ? 'sold-out' : ''}" data-ticket-id="${ticket.id}" onclick="${isSoldOut ? '' : `selectTicket(${ticket.id})`}">
             <div class="locality-header">
               <h4 class="locality-name">${ticket.type}</h4>
-              <div class="locality-color" style="background:${color};"></div>
             </div>
             ${priceHTML}
             <div class="locality-availability">
